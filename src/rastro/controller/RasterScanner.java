@@ -13,17 +13,19 @@ public class RasterScanner implements Iterable<boolean[]> {
     private boolean[][] shape;
     private int vPadding;
     private int hPadding;
+    private int lnStep;
     private ImageController imCon;
 
-    public RasterScanner(int stepPermmX, int stepPermmY, int sizeXmm, int sizeYmm, boolean[][] scannerShape) {
+    public RasterScanner(int stepPermmX, int stepPermmY, int sizeXmm, int sizeYmm,
+            boolean[][] scannerShape, int lineStep) {
         spmX = stepPermmX;
         spmY = stepPermmY;
         width = sizeXmm * spmX;
         height = sizeYmm * spmY;
         shape = scannerShape;
-        vPadding = (shape.length - 1) / 2; // both scannerShape dimensions must
-                                           // be odd
+        vPadding = (shape.length - 1) / 2; // both scannerShape dimensions must be odd
         hPadding = (shape[0].length - 1) / 2;
+        lnStep = lineStep;
         buffer = new boolean[shape.length][width + 2 * hPadding];
     }
 
@@ -54,17 +56,17 @@ public class RasterScanner implements Iterable<boolean[]> {
     }
 
     private void advanceBuffer() {
-        for (int i = 0; i < buffer.length - 1; i++) {
-            buffer[i] = buffer[i + 1];
+        for (int i = 0; i < buffer.length - lnStep; i++) {
+            buffer[i] = buffer[i + lnStep];
         }
-        fillLine(buffer[buffer.length - 1], nLine + vPadding);
-        nLine++;
+        for (int i = 0; i < lnStep; i++) { 
+            fillLine(buffer[buffer.length - lnStep + i], nLine + vPadding);
+            nLine++;
+        }
     }
 
     private boolean[] scanLine() {
-        boolean[] res = new boolean[width]; // When shape "true" pixel
-                                            // intersects with image "true",
-                                            // then isOn false
+        boolean[] res = new boolean[width]; // When shape "true" pixel intersects with image "true", then isOn false
         for (int x = 0; x < width; x++) {
             boolean isOn = true;
             for (int i = -vPadding; i <= vPadding; i++) {
