@@ -82,7 +82,7 @@ public class RasterScanner implements Iterable<boolean[]> {
 
             @Override
             public boolean hasNext() {
-                return nLine < height + vPadding;
+                return nLine <= height + vPadding;
             }
 
             @Override
