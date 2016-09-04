@@ -30,7 +30,6 @@ public class RasterScanner implements Iterable<boolean[]> {
     }
 
     public void loadImage(ImageController imgController) {
-        nLine = 0;
         imCon = imgController;
         preFillBuffer();
     }
@@ -40,38 +39,36 @@ public class RasterScanner implements Iterable<boolean[]> {
     }
 
     private void preFillBuffer() {
-        int y = -1 - vPadding; // Actual y position is -1 for convenience
-        for (boolean[] row : this.buffer) {
-            fillLine(row, y);
-            y++;
+        nLine = -vPadding;
+        while(nLine <= vPadding) {
+            advanceBuffer();
         }
     }
 
     private void fillLine(boolean[] row, int y) {
         float xInc = 1.0f / spmX;
         float yInc = 1.0f / spmY;
-        for (int x = 0; x < width; x++) {
+        for (int x = 0; x < row.length; x++) {
             row[x] = imCon.isBlack((x - hPadding) * xInc, y * yInc);
         }
     }
 
     private void advanceBuffer() {
-        for (int i = 0; i < buffer.length - lnStep; i++) {
-            buffer[i] = buffer[i + lnStep];
+        boolean[] firstRow = buffer[0];
+        for (int i = 0; i < buffer.length - 1; i++) {
+            buffer[i] = buffer[i + 1];
         }
-        for (int i = 0; i < lnStep; i++) { 
-            fillLine(buffer[buffer.length - lnStep + i], nLine + vPadding);
-            nLine++;
-        }
+        fillLine(firstRow, nLine++);
+        buffer[buffer.length - 1] = firstRow;        
     }
 
     private boolean[] scanLine() {
         boolean[] res = new boolean[width]; // When shape "true" pixel intersects with image "true", then isOn false
         for (int x = 0; x < width; x++) {
             boolean isOn = true;
-            for (int i = -vPadding; i <= vPadding; i++) {
-                for (int j = -hPadding; j <= hPadding; j++) {
-                    isOn &= !(shape[i + vPadding][j + hPadding] && buffer[i][j + x]);
+            for (int i = 0; i <= vPadding * 2; i++) {
+                for (int j = 0; j <= hPadding * 2; j++) {
+                    isOn &= !(shape[i][j] && buffer[i][j + x]);
                 } // Loop is not interrupted for uniform performance
             }
             res[x] = isOn;
@@ -85,13 +82,16 @@ public class RasterScanner implements Iterable<boolean[]> {
 
             @Override
             public boolean hasNext() {
-                return nLine < height;
+                return nLine < height + vPadding;
             }
 
             @Override
             public boolean[] next() {
-                advanceBuffer();
-                return scanLine();
+                boolean[] line = scanLine();
+                for (int i = 0; i < lnStep; i++) {
+                    advanceBuffer();
+                }
+                return line;
             }
 
             @Override
