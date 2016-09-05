@@ -4,11 +4,12 @@ import rastro.controller.CommController.CommResult;
 
 public class RastroCommand {
 
-    private byte[] buffer;
+    private byte[] txBuffer;
+    private byte[] rxBuffer;
+    private CommController comCtrl;
+    private static final byte[] ack = {'A', 'C', 'K'};
     private static final byte[] LINE_HDR = { 'L', 'N' };
-    private static final int CRC_LEN = 2;
-    private static final int CTRL_LEN = 12;
-    
+    private static final int CRC_LEN = 2; 
     private static final int[] CRC_TABLE = {    // Waste of space in sake of simple syntax
         0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
         0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -43,9 +44,11 @@ public class RastroCommand {
         0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
         0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040 };
 
-    public RastroCommand(int lineLength) {
+    public RastroCommand(int lineLength, CommController commController) {
+        comCtrl = commController;
         int buffSize = (int) Math.ceil((float) lineLength / 8.0f) + LINE_HDR.length + CRC_LEN;
-        buffer = new byte[Math.max(buffSize, CTRL_LEN)];
+        txBuffer = new byte[buffSize];
+        rxBuffer = new byte[ack.length];
     }
 
     public CommResult sendLine(boolean isInverted, boolean[] line) {
@@ -55,14 +58,18 @@ public class RastroCommand {
         } else {
             packStraightLine(line, LINE_HDR.length);
         }
-        computeCRC16(buffer.length - CRC_LEN);
-
-        return CommResult.ok;
+        computeCRC16(txBuffer.length - CRC_LEN);
+        comCtrl.write(txBuffer);
+        int rxLen = comCtrl.read(rxBuffer);
+        if (rxLen == 3 && rxBuffer.equals(ack)) {
+            return CommResult.ok;
+        }
+        return CommResult.error;
     }
 
     private void putHeader(byte[] hdr) {
         for (int i = 0; i < hdr.length; i++) {
-            buffer[i] = hdr[i];
+            txBuffer[i] = hdr[i];
         }
     }
 
@@ -71,9 +78,9 @@ public class RastroCommand {
             int buffIdx = i >> 3;
             int bitShift = i & 7;
             if (bitShift == 0) {
-                buffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
+                txBuffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
             } else {
-                buffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
+                txBuffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
             }
         }
     }
@@ -83,9 +90,9 @@ public class RastroCommand {
             int buffIdx = j >> 3;
             int bitShift = j & 7;
             if (bitShift == 0) {
-                buffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
+                txBuffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
             } else {
-                buffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
+                txBuffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
             }
         }
     }
@@ -93,9 +100,9 @@ public class RastroCommand {
     private void computeCRC16(int dataLen) {
         int res = 0;
         for (int i = 0; i < dataLen; i++) {
-            res = CRC_TABLE[buffer[i] ^ (res & 0xFF)] ^ (res >>> 8);
+            res = CRC_TABLE[((int)txBuffer[i] ^ res) & 0xFF] ^ (res >>> 8);
         }
-        buffer[dataLen] = (byte)(res >>> 8);
-        buffer[dataLen + 1] = (byte)(res & 0xFF);
+        txBuffer[dataLen] = (byte)(res >>> 8);
+        txBuffer[dataLen + 1] = (byte)(res & 0xFF);
     }
 }

@@ -58,7 +58,7 @@ public class RasterScannerTest {
         while (it.hasNext()) {
             result.add(it.next());
         }
-        assertEquals(result.size(), 10);
+        assertEquals(10, result.size());
     }
     
     @Test
@@ -101,7 +101,7 @@ public class RasterScannerTest {
         }
         for (int i = 0; i < result.size(); i++) {
             for (int j = 0; j < result.get(i).length; j++) {
-                assertEquals(result.get(i)[j], expectedImage[i][j]);
+                assertEquals(expectedImage[i][j], result.get(i)[j]);
             }
         }
     }
@@ -116,7 +116,7 @@ public class RasterScannerTest {
             while (it.hasNext()) {
                 result.add(it.next());
             }
-            assertEquals(result.size(), (int)Math.ceil(16.0f / stepSize));
+            assertEquals((int)Math.ceil(16.0f / stepSize), result.size());
         }
     }
     
@@ -130,7 +130,7 @@ public class RasterScannerTest {
             result.add(it.next());
         }
         for(boolean[] b : result) {
-            assertEquals(b.length, 16);
+            assertEquals(16, b.length);
         }
     }
 
@@ -141,11 +141,8 @@ public class RasterScannerTest {
         Random rng = new Random();
         for (int stepSize = 1; stepSize < 10; stepSize++) {        
             boolean[][] img = new boolean[vSize][hSize];
-            int p = 0;
             for(boolean[] row: img) {
-                p++;
                 for(int i = 0; i < row.length; i++) {
-                //  row[i] = (p + i) % 2 == 0;
                     row[i] = rng.nextBoolean();
                 }
             }
@@ -174,13 +171,8 @@ public class RasterScannerTest {
             }
             for(int i = 0; i < result.size(); i++) {
                 for (int j = 0; j < result.get(i).length; j++) {
-                    /* System.out.print(!testImage[i * stepSize][j]);
-                    System.out.print("->");
-                    System.out.print(result.get(i)[j]);
-                    System.out.print("\t");*/
-                    assertEquals(result.get(i)[j], !testImage[i * stepSize][j]);
+                    assertEquals(!testImage[i * stepSize][j], result.get(i)[j]);
                 }
-                //System.out.println();
             }
         }
     }
