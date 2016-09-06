@@ -16,10 +16,9 @@ import rastro.controller.*;
 import rastro.controller.CommController.CommResult;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RastroCommand.class,
-                 CommController.class})
+@PrepareForTest({CommController.class})
 
-public class RastroCommandTest {
+public class RastroLineCommandTest {
 
     @Mock private CommController commCtrl;
 
@@ -47,7 +46,7 @@ public class RastroCommandTest {
                         return CommResult.ok;
                     }
                 });
-        RastroCommand rc = new RastroCommand(line.length, commCtrl);
+        RastroLineCommand rc = new RastroLineCommand(line.length, commCtrl);
         rc.sendLine(false, line);           
     }
     
@@ -67,7 +66,7 @@ public class RastroCommandTest {
                         return CommResult.ok;
                     }
                 });
-        RastroCommand rc = new RastroCommand(line.length, commCtrl);
+        RastroLineCommand rc = new RastroLineCommand(line.length, commCtrl);
         rc.sendLine(true, line);           
     }
 
@@ -83,7 +82,7 @@ public class RastroCommandTest {
                         return CommResult.ok;
                     }
                 });
-        RastroCommand rc = new RastroCommand(line.length, commCtrl);
+        RastroLineCommand rc = new RastroLineCommand(line.length, commCtrl);
         rc.sendLine(false, line);           
     }
    
@@ -104,7 +103,7 @@ public class RastroCommandTest {
                         return CommResult.ok;
                     }
                 });
-        RastroCommand rc = new RastroCommand(line.length, commCtrl);
+        RastroLineCommand rc = new RastroLineCommand(line.length, commCtrl);
         rc.sendLine(false, line);           
     }
 }

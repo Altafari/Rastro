@@ -2,14 +2,16 @@ package rastro.controller;
 
 import rastro.controller.CommController.CommResult;
 
-public class RastroCommand {
+public abstract class RastroCommand {
 
-    private byte[] txBuffer;
-    private byte[] rxBuffer;
-    private CommController comCtrl;
-    private static final byte[] ack = {'A', 'C', 'K'};
-    private static final byte[] LINE_HDR = { 'L', 'N' };
-    private static final int CRC_LEN = 2; 
+    protected byte[] txBuffer;
+    protected byte[] rxBuffer;
+    protected CommController comCtrl;
+    protected int lineLen;
+    protected static final byte[] ACK = {'A', 'C', 'K'};
+    protected static final byte[] NAK = {'N', 'A', 'K'};
+    protected static final int N_RETRY = 3;
+    protected static final int CRC_LEN = 2; 
     private static final int[] CRC_TABLE = {    // Waste of space in sake of simple syntax
         0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
         0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -45,64 +47,38 @@ public class RastroCommand {
         0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040 };
 
     public RastroCommand(int lineLength, CommController commController) {
+        lineLen = lineLength;
         comCtrl = commController;
-        int buffSize = (int) Math.ceil((float) lineLength / 8.0f) + LINE_HDR.length + CRC_LEN;
-        txBuffer = new byte[buffSize];
-        rxBuffer = new byte[ack.length];
+        rxBuffer = new byte[ACK.length];
     }
 
-    public CommResult sendLine(boolean isInverted, boolean[] line) {
-        putHeader(LINE_HDR);
-        if (isInverted) {
-            packInvertedLine(line, LINE_HDR.length);
-        } else {
-            packStraightLine(line, LINE_HDR.length);
+    protected void putHeader(byte[] hdr) {
+        for (int i =0; i < hdr.length; i++) {
+            txBuffer[i] = hdr[i]; 
         }
-        computeCRC16(txBuffer.length - CRC_LEN);
-        comCtrl.write(txBuffer);
-        int rxLen = comCtrl.read(rxBuffer);
-        if (rxLen == 3 && rxBuffer.equals(ack)) {
-            return CommResult.ok;
-        }
-        return CommResult.error;
-    }
-
-    private void putHeader(byte[] hdr) {
-        for (int i = 0; i < hdr.length; i++) {
-            txBuffer[i] = hdr[i];
-        }
-    }
-
-    private void packStraightLine(boolean[] line, int buffOffset) {
-        for (int i = 0; i < line.length; i++) {
-            int buffIdx = i >> 3;
-            int bitShift = i & 7;
-            if (bitShift == 0) {
-                txBuffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
-            } else {
-                txBuffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
+    };
+    
+    protected CommResult send() {
+        computeCRC16(txBuffer);
+        synchronized (comCtrl) {
+            int i = N_RETRY;
+            while (--i >= 0) {
+                comCtrl.write(txBuffer);
+                int rxLen = comCtrl.read(rxBuffer);
+                if (rxLen == ACK.length && rxBuffer.equals(ACK)) {
+                    return CommResult.ok;
+                }
             }
+            return CommResult.error;
         }
     }
-
-    private void packInvertedLine(boolean[] line, int buffOffset) {
-        for (int i = line.length - 1, j = 0; i >= 0; i--, j++) {
-            int buffIdx = j >> 3;
-            int bitShift = j & 7;
-            if (bitShift == 0) {
-                txBuffer[buffIdx + buffOffset] = line[i] ? (byte) 1 : 0;
-            } else {
-                txBuffer[buffIdx + buffOffset] |= line[i] ? (byte) 1 << bitShift : 0;
-            }
-        }
-    }
-
-    private void computeCRC16(int dataLen) {
+    
+    protected static void computeCRC16(byte[] data) {
         int res = 0;
-        for (int i = 0; i < dataLen; i++) {
-            res = CRC_TABLE[((int)txBuffer[i] ^ res) & 0xFF] ^ (res >>> 8);
+        for (int i = 0; i < data.length - 2; i++) {
+            res = CRC_TABLE[((int)data[i] ^ res) & 0xFF] ^ (res >>> 8);
         }
-        txBuffer[dataLen] = (byte)(res >>> 8);
-        txBuffer[dataLen + 1] = (byte)(res & 0xFF);
+        data[data.length - 2] = (byte)(res >>> 8);
+        data[data.length - 1] = (byte)(res & 0xFF);
     }
 }
