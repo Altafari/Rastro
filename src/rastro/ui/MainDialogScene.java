@@ -1,8 +1,15 @@
 package rastro.ui;
 
 import javax.swing.*;
+
+import rastro.controller.CommController;
+import rastro.controller.ImageController;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
+
+import static rastro.ui.GlobalUiDimensions.*;
 
 public class MainDialogScene {
     private static void createAndShowGUI() {
@@ -16,7 +23,17 @@ public class MainDialogScene {
     }
 
     private static void addComponentsToPane(Container pane) {
-        pane.add(new CommPanel(), BorderLayout.LINE_START);
+        JPanel lineStartPanel = new JPanel();
+        lineStartPanel.setLayout(new BoxLayout(lineStartPanel, BoxLayout.PAGE_AXIS));
+        lineStartPanel.setPreferredSize(LINE_START_PANEL.dim);
+        CommPanel grblComm = new CommPanel("GRBL", new String[] { "115200", "9600" }, new CommController());
+        CommPanel rastroComm = new CommPanel("Rastro", new String[] { "115200" }, new CommController());
+        lineStartPanel.add(grblComm);
+        lineStartPanel.add(rastroComm);
+        lineStartPanel.add(new ImageControlPanel(new ImageController(96)));
+        lineStartPanel.add(Box.createVerticalGlue());
+        pane.add(lineStartPanel, BorderLayout.LINE_START);
+        pane.add(new JPanel(), BorderLayout.LINE_END);
     }
 
     public static void main(String[] args) {

@@ -17,7 +17,7 @@ public class ImageController {
     private int width;
     private int height;
 
-    ImageController(int dpiVal) {
+    public ImageController(int dpiVal) {
         setDpi(dpiVal);
     }
 

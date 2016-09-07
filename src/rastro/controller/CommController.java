@@ -16,7 +16,7 @@ public class CommController {
     public enum CommResult {
         ok, error
     };
-
+    private int timeout = 100;
     private String portName = "";
     private int baudRate = 115200;
     private SerialPort sPort = null;
@@ -104,10 +104,24 @@ public class CommController {
     }
 
     public int read(byte[] buff) {
+        return read(buff, timeout);
+    }
+    
+    public int read(byte[] buff, int timeout) {
         try {
+            sPort.enableReceiveThreshold(buff.length);
+            if (timeout > 0) {
+                sPort.enableReceiveTimeout(timeout);
+            } else {
+                sPort.disableReceiveTimeout();
+            }
             return sPort.getInputStream().read(buff);
-        } catch (IOException | NullPointerException e) {
+        } catch (IOException | NullPointerException | UnsupportedCommOperationException e) {
             return -1;
         }
+    }
+    
+    public void setTimeout(int rxTimeout) {
+        timeout = rxTimeout;
     }
 }
