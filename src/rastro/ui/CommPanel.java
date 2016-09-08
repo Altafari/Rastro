@@ -1,10 +1,13 @@
 package rastro.ui;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import rastro.controller.CommController;
@@ -22,24 +25,45 @@ public class CommPanel extends BorderedTitledPanel {
     private JButton btnOpen;
     private JButton btnTest;
     private CommController cCon;
+    private final static int PADDING_SMALL = 5;
+    private final static int PADDING_LARGE = 10;
+    private final static Dimension DIM_PORT_FIELD = new Dimension(130, 22);
+    private final static Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
+    private final static Dimension DIM_LINK_FIELD = new Dimension(40, 22);
 
     CommPanel(String title, String[] allowedBaudRates, CommController controller) {
         super(title);
         cCon = controller;
         comPortName = new JComboBox<String>(CommController.getPortList());
+        comPortName.setMinimumSize(DIM_PORT_FIELD);
+        comPortName.setPreferredSize(DIM_PORT_FIELD);
+        comPortName.setMaximumSize(DIM_PORT_FIELD);
         baudRate = new JComboBox<String>(allowedBaudRates);
+        baudRate.setMinimumSize(DIM_BAUD_FIELD);
+        baudRate.setPreferredSize(DIM_BAUD_FIELD);
+        baudRate.setMaximumSize(DIM_BAUD_FIELD);
         linkStatus = new JTextField();
         linkStatus.setEditable(false);
+        linkStatus.setMinimumSize(DIM_LINK_FIELD);
+        linkStatus.setPreferredSize(DIM_LINK_FIELD);
+        linkStatus.setMaximumSize(DIM_LINK_FIELD);
         btnOpen = new JButton("Open");
         btnOpen.setActionCommand("open");
         btnOpen.addActionListener(actionListener);
         btnTest = new JButton("Test");
         btnTest.setActionCommand("test");
         btnTest.addActionListener(actionListener);
+        this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(comPortName);
+        this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(baudRate);
+        this.add(Box.createHorizontalStrut(PADDING_LARGE));
+        this.add(new JLabel("Status:"));
+        this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(linkStatus);
+        this.add(Box.createHorizontalStrut(PADDING_LARGE));
         this.add(btnOpen);
+        this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(btnTest);
     }
     

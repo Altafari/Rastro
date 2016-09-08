@@ -1,11 +1,10 @@
 package rastro.ui;
 
-import static rastro.ui.GlobalUiDimensions.RACK_SIZE;
-
 import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 public class BorderedTitledPanel extends JPanel {
@@ -14,8 +13,10 @@ public class BorderedTitledPanel extends JPanel {
      */ 
     private static final long serialVersionUID = 1L;
     private static int PADDING = 2;
+    private static Dimension DIM_PANEL = new Dimension(500, 70);
     
     public BorderedTitledPanel(String title) {
+        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING),
                         BorderFactory.createTitledBorder(
@@ -27,6 +28,6 @@ public class BorderedTitledPanel extends JPanel {
     }
     
     protected Dimension getDimension() {
-        return  RACK_SIZE.dim;
+        return  DIM_PANEL;
     }
 }

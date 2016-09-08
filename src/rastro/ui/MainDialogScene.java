@@ -7,17 +7,12 @@ import rastro.controller.ImageController;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
-
-import static rastro.ui.GlobalUiDimensions.*;
 
 public class MainDialogScene {
     private static void createAndShowGUI() {
         JFrame frame = new JFrame("Rastro v1.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         addComponentsToPane(frame.getContentPane());
-
         frame.pack();
         frame.setVisible(true);
     }
@@ -25,7 +20,6 @@ public class MainDialogScene {
     private static void addComponentsToPane(Container pane) {
         JPanel lineStartPanel = new JPanel();
         lineStartPanel.setLayout(new BoxLayout(lineStartPanel, BoxLayout.PAGE_AXIS));
-        lineStartPanel.setPreferredSize(LINE_START_PANEL.dim);
         CommPanel grblComm = new CommPanel("GRBL", new String[] { "115200", "9600" }, new CommController());
         CommPanel rastroComm = new CommPanel("Rastro", new String[] { "115200" }, new CommController());
         lineStartPanel.add(grblComm);

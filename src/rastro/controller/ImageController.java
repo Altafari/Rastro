@@ -21,11 +21,14 @@ public class ImageController {
         setDpi(dpiVal);
     }
 
-    public RasterResult loadImage(String filename) {
+    public RasterResult loadImage(File file) {
         img = null;
         try {
-            img = ImageIO.read(new File(filename));
+            img = ImageIO.read(file);
         } catch (IOException e) {
+            return RasterResult.error;
+        }
+        if (img == null) {
             return RasterResult.error;
         }
         width = img.getWidth();
