@@ -3,6 +3,8 @@ package rastro.ui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.File;
 
 import javax.swing.Box;
@@ -23,11 +25,12 @@ public class ImageControlPanel extends BorderedTitledPanel {
     private JTextField imageDpi;
     private ImageController imCon;
     private JFileChooser fc;
-    private final static int PADDING_SMALL = 5;
-    private final static int PADDING_LARGE = 10;
-    private final static Dimension DIM_FILE_FIELD = new Dimension(180, 22);
-    private final static Dimension DIM_DPI_FIELD = new Dimension(40, 22);
-    private final static String[] ACCEPTED_FILE_EXTENSIONS = {".jpg", ".jpeg", ".bmp", ".png", ".tiff"};
+    private int dpi = 900;
+    private static final int MIN_DPI = 75;
+    private static final int MAX_DPI = 2400;
+    private static final Dimension DIM_FILE_FIELD = new Dimension(180, 22);
+    private static final Dimension DIM_DPI_FIELD = new Dimension(40, 22);
+    private static final String[] ACCEPTED_FILE_EXTENSIONS = {".jpg", ".jpeg", ".bmp", ".png", ".tiff"};
     
     private ActionListener actionListener = new ActionListener() {
 
@@ -42,14 +45,19 @@ public class ImageControlPanel extends BorderedTitledPanel {
                         fileName.setText(imgFile.getName());
                     } else {
                         fileName.setText("");
-                        JOptionPane.showMessageDialog(ImageControlPanel.this,
+                        if (imgFile != null) {
+                            JOptionPane.showMessageDialog(ImageControlPanel.this,
                                 "Can't load image file: " + imgFile.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
+                break;
+                case "dpi":
+                    onDpiChange();                  
                 break;
                 default:
             }
         }       
-    };
+    };    
     
     ImageControlPanel(ImageController imgController) {
         super("Input image");
@@ -59,7 +67,10 @@ public class ImageControlPanel extends BorderedTitledPanel {
             @Override
             public boolean accept(File file) {
                 String fileName = file.getName();
-                for (String ex : ACCEPTED_FILE_EXTENSIONS) {
+                if (file.isDirectory()) {
+                    return true;
+                }
+                for (String ex : ACCEPTED_FILE_EXTENSIONS) {                    
                     if (fileName.endsWith(ex)) {
                         return true;
                     }
@@ -70,8 +81,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
             @Override
             public String getDescription() {
                 return "Image files";
-            }
-            
+            }            
         });
         fc.setMultiSelectionEnabled(false);
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -84,6 +94,20 @@ public class ImageControlPanel extends BorderedTitledPanel {
         btnBrowse.addActionListener(actionListener);
         imageDpi = new JTextField();        
         imageDpi.setMaximumSize(DIM_DPI_FIELD);
+        imageDpi.setActionCommand("dpi");
+        imageDpi.addActionListener(actionListener);
+        imageDpi.addFocusListener(new FocusListener() {
+
+            @Override
+            public void focusGained(FocusEvent event) {                
+            }
+
+            @Override
+            public void focusLost(FocusEvent event) {
+                onDpiChange();
+            }
+            
+        });
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(new JLabel("File:"));
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
@@ -96,5 +120,18 @@ public class ImageControlPanel extends BorderedTitledPanel {
         this.add(imageDpi);
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
         this.add(new JLabel("DPI"));
+        onDpiChange();
+    }
+    
+    private void onDpiChange() {
+        int val = 0;
+        try {
+            val = Integer.parseInt(imageDpi.getText());            
+        } catch (NumberFormatException e) { }
+        if (val >= MIN_DPI && val <= MAX_DPI) {
+            dpi = val;
+        }
+        imageDpi.setText(Integer.toString(dpi));
+        imCon.setDpi(dpi);
     }
 }

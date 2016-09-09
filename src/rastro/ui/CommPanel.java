@@ -25,8 +25,6 @@ public class CommPanel extends BorderedTitledPanel {
     private JButton btnOpen;
     private JButton btnTest;
     private CommController cCon;
-    private final static int PADDING_SMALL = 5;
-    private final static int PADDING_LARGE = 10;
     private final static Dimension DIM_PORT_FIELD = new Dimension(130, 22);
     private final static Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
     private final static Dimension DIM_LINK_FIELD = new Dimension(40, 22);

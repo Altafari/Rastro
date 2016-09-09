@@ -12,22 +12,26 @@ public class BorderedTitledPanel extends JPanel {
      * 
      */ 
     private static final long serialVersionUID = 1L;
-    private static int PADDING = 2;
-    private static Dimension DIM_PANEL = new Dimension(500, 70);
-    
+    private static final int BORDER_PADDING = 2;    
+    private static final int RACK_WIDTH = 500;
+    protected static final int RACK_HEIGHT = 70;  
+    protected static final int PADDING_SMALL = 5;
+    protected static final int PADDING_LARGE = 10;
+
     public BorderedTitledPanel(String title) {
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING),
+                BorderFactory.createEmptyBorder(BORDER_PADDING, BORDER_PADDING,
+                        BORDER_PADDING, BORDER_PADDING),
                         BorderFactory.createTitledBorder(
                                 BorderFactory.createLineBorder(Color.gray), title)));
-        Dimension dim = getDimension();
+        Dimension dim = new Dimension(RACK_WIDTH, getRackHeight());
         this.setMinimumSize(dim);
         this.setPreferredSize(dim);
         this.setMaximumSize(dim);
     }
     
-    protected Dimension getDimension() {
-        return  DIM_PANEL;
+    protected int getRackHeight() {
+        return  RACK_HEIGHT;
     }
 }

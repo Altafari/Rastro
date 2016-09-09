@@ -22,9 +22,11 @@ public class MainDialogScene {
         lineStartPanel.setLayout(new BoxLayout(lineStartPanel, BoxLayout.PAGE_AXIS));
         CommPanel grblComm = new CommPanel("GRBL", new String[] { "115200", "9600" }, new CommController());
         CommPanel rastroComm = new CommPanel("Rastro", new String[] { "115200" }, new CommController());
+        ImageInfoPanel imageInfoPanel = new ImageInfoPanel();
         lineStartPanel.add(grblComm);
         lineStartPanel.add(rastroComm);
-        lineStartPanel.add(new ImageControlPanel(new ImageController(96)));
+        lineStartPanel.add(new ImageControlPanel(new ImageController(imageInfoPanel)));
+        lineStartPanel.add(imageInfoPanel);
         lineStartPanel.add(Box.createVerticalGlue());
         pane.add(lineStartPanel, BorderLayout.LINE_START);
         pane.add(new JPanel(), BorderLayout.LINE_END);
