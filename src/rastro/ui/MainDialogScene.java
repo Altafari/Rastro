@@ -18,18 +18,19 @@ public class MainDialogScene {
     }
 
     private static void addComponentsToPane(Container pane) {
-        JPanel lineStartPanel = new JPanel();
-        lineStartPanel.setLayout(new BoxLayout(lineStartPanel, BoxLayout.PAGE_AXIS));
+        JPanel ctrlPanel = new JPanel();
+        ctrlPanel.setLayout(new BoxLayout(ctrlPanel, BoxLayout.PAGE_AXIS));
         CommPanel grblComm = new CommPanel("GRBL", new String[] { "115200", "9600" }, new CommController());
         CommPanel rastroComm = new CommPanel("Rastro", new String[] { "115200" }, new CommController());
         ImageInfoPanel imageInfoPanel = new ImageInfoPanel();
-        lineStartPanel.add(grblComm);
-        lineStartPanel.add(rastroComm);
-        lineStartPanel.add(new ImageControlPanel(new ImageController(imageInfoPanel)));
-        lineStartPanel.add(imageInfoPanel);
-        lineStartPanel.add(new CncOriginPanel());
-        lineStartPanel.add(Box.createVerticalGlue());
-        pane.add(lineStartPanel, BorderLayout.LINE_START);
+        ctrlPanel.add(grblComm);
+        ctrlPanel.add(rastroComm);
+        ctrlPanel.add(new ImageControlPanel(new ImageController(imageInfoPanel)));
+        ctrlPanel.add(imageInfoPanel);
+        ctrlPanel.add(new CncOriginPanel());
+        ctrlPanel.add(new CncPositioningPanel());
+        ctrlPanel.add(Box.createVerticalGlue());
+        pane.add(ctrlPanel, BorderLayout.LINE_START);        
         pane.add(new JPanel(), BorderLayout.LINE_END);
     }
 

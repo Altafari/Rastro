@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry including="*.java" kind="src" path="rxtx"/>
+	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="/usr/share/java/RXTXcomm.jar" sourcepath="/home/amh/Downloads/rxtx-2.1-7r2.zip"/>
 	<classpathentry kind="lib" path="/usr/share/java/junit.jar"/>

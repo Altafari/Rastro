@@ -23,7 +23,7 @@ public class CncOriginPanel extends BorderedTitledPanel {
     private JButton goOrigin;
     private float[] position;
     private float[] origin;
-    private static final Dimension NUM_FIELD = new Dimension(50, 22);
+    private static final Dimension NUM_FIELD = new Dimension(55, 22);
     public CncOriginPanel() {
         super("CNC origin");
         positionX = new JTextField();
@@ -88,14 +88,14 @@ public class CncOriginPanel extends BorderedTitledPanel {
     
     public void setPosition(float[] coord) {
         position = coord.clone();
-        positionX.setText(String.format("%4.1f", position[0]));
-        positionY.setText(String.format("%4.1f", position[1]));
+        positionX.setText(String.format("%4.2f", position[0]));
+        positionY.setText(String.format("%4.2f", position[1]));
     }
     
     public void setOrigin() {
         origin = position.clone();
-        originX.setText(String.format("%4.1f", origin[0]));
-        originY.setText(String.format("%4.1f", origin[1]));
+        originX.setText(String.format("%4.2f", origin[0]));
+        originY.setText(String.format("%4.2f", origin[1]));
     }
     
     public float[] getOrigin() {
