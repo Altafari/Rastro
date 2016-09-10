@@ -38,4 +38,9 @@ public class ImageInfoPanel extends BorderedTitledPanel {
     private String formatMm(float f) {
         return f == 0.0f || Float.isInfinite(f) || Float.isNaN(f) ? "n/a" : String.format("%.1fmm", f);
     }
+    
+    @Override
+    protected int getRackHeight() {
+        return (int)(RACK_HEIGHT * 0.8f);
+    }
 }

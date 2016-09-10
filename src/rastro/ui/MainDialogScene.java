@@ -27,6 +27,7 @@ public class MainDialogScene {
         lineStartPanel.add(rastroComm);
         lineStartPanel.add(new ImageControlPanel(new ImageController(imageInfoPanel)));
         lineStartPanel.add(imageInfoPanel);
+        lineStartPanel.add(new CncOriginPanel());
         lineStartPanel.add(Box.createVerticalGlue());
         pane.add(lineStartPanel, BorderLayout.LINE_START);
         pane.add(new JPanel(), BorderLayout.LINE_END);

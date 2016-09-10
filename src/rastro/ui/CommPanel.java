@@ -25,9 +25,9 @@ public class CommPanel extends BorderedTitledPanel {
     private JButton btnOpen;
     private JButton btnTest;
     private CommController cCon;
-    private final static Dimension DIM_PORT_FIELD = new Dimension(130, 22);
-    private final static Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
-    private final static Dimension DIM_LINK_FIELD = new Dimension(40, 22);
+    private static final Dimension DIM_PORT_FIELD = new Dimension(130, 22);
+    private static final Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
+    private static final Dimension DIM_LINK_FIELD = new Dimension(40, 22);
 
     CommPanel(String title, String[] allowedBaudRates, CommController controller) {
         super(title);

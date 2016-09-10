@@ -19,7 +19,7 @@ public class BorderedTitledPanel extends JPanel {
     protected static final int PADDING_LARGE = 10;
 
     public BorderedTitledPanel(String title) {
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout();
         this.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(BORDER_PADDING, BORDER_PADDING,
                         BORDER_PADDING, BORDER_PADDING),
@@ -33,5 +33,9 @@ public class BorderedTitledPanel extends JPanel {
     
     protected int getRackHeight() {
         return  RACK_HEIGHT;
+    }
+    
+    protected void setLayout() {
+        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     }
 }
