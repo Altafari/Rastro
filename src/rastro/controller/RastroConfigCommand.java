@@ -1,7 +1,5 @@
 package rastro.controller;
 
-import rastro.controller.CommController.CommResult;
-
 public class RastroConfigCommand extends RastroCommand {
     
     public static final byte MODE_ZIGZAG = 0;
@@ -12,8 +10,8 @@ public class RastroConfigCommand extends RastroCommand {
     private short expTime;
     private byte mode;
     
-    public RastroConfigCommand(int lineLength, CommController commController) {
-        super(lineLength, commController);
+    public RastroConfigCommand(int lineLength) {
+        super(lineLength);
         int buffLength = CFG_HDR.length + CFG_FIELDS_LEN + CRC_LEN; 
         txBuffer = new byte[buffLength];
     }
@@ -30,19 +28,21 @@ public class RastroConfigCommand extends RastroCommand {
         mode = isZigZag ? MODE_ZIGZAG : MODE_LINEBYLINE;
     }
     
-    public CommResult sendConfig() {
+    private int putShort(short x, int offset) {
+        txBuffer[offset] = (byte)(x >> 8);
+        txBuffer[offset + 1] = (byte)(x & 0xFF);
+        return offset + 2;
+    }
+    
+    @Override
+    public byte[] getRequest() {
         putHeader(CFG_HDR);
         int offset = CFG_HDR.length;
         offset = putShort((short) lineLen, offset);
         offset = putShort((short) lnOffset, offset);
         offset = putShort((short) expTime, offset);
         txBuffer[offset] = mode;
-        return send();
-    }
-    
-    private int putShort(short x, int offset) {
-        txBuffer[offset] = (byte)(x >> 8);
-        txBuffer[offset + 1] = (byte)(x & 0xFF);
-        return offset + 2;
+        computeCRC16(txBuffer);
+        return txBuffer;
     }
 }

@@ -14,9 +14,8 @@ import gnu.io.UnsupportedCommOperationException;
 
 public class CommController {
     public enum CommResult {
-        ok, error
+        ok, error, parseError, noResponse
     };
-    private int timeout = 100;
     private String portName = "";
     private int baudRate = 115200;
     private SerialPort sPort = null;
@@ -102,11 +101,7 @@ public class CommController {
         }
         return CommResult.ok;
     }
-
-    public int read(byte[] buff) {
-        return read(buff, timeout);
-    }
-    
+  
     public int read(byte[] buff, int timeout) {
         try {
             sPort.enableReceiveThreshold(buff.length);
@@ -121,7 +116,19 @@ public class CommController {
         }
     }
     
-    public void setTimeout(int rxTimeout) {
-        timeout = rxTimeout;
+    public CommResult sendCommand(ICommCommand cmd) {
+        if (write(cmd.getRequest()) != CommResult.ok) {
+            return CommResult.error;
+        }
+        int bytesRead = read(cmd.getResponseBufer(), cmd.getTimeout());
+        if (bytesRead >= 0) {
+            if (!cmd.parseResponse(bytesRead)) {
+                return CommResult.parseError;
+            } else {
+                return CommResult.ok;
+            }            
+        } else {
+            return CommResult.noResponse;
+        }
     }
 }

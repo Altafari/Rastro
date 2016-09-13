@@ -1,24 +1,22 @@
 package rastro.controller;
 
-import rastro.controller.CommController.CommResult;
-
 public class RastroLineCommand extends RastroCommand {
 
     private static final byte LINE_HDR[] = {'L', 'N'};  
-    public RastroLineCommand(int lineLength, CommController commController) {
-        super(lineLength, commController);
+    public RastroLineCommand(int lineLength) {
+        super(lineLength);
         int buffSize = (int) Math.ceil((float) lineLen / 8.0f) + LINE_HDR.length + CRC_LEN;
         txBuffer = new byte[buffSize];
     }
     
-    public CommResult sendLine(boolean isInverted, boolean[] line) {
+    public void packLine(boolean isInverted, boolean[] line) {
         putHeader(LINE_HDR);
         if (isInverted) {
             packInvertedLine(line, LINE_HDR.length);
         } else {
             packStraightLine(line, LINE_HDR.length);
         }
-        return send();
+        computeCRC16(txBuffer);
     }
 
     private void packStraightLine(boolean[] line, int buffOffset) {
@@ -45,4 +43,8 @@ public class RastroLineCommand extends RastroCommand {
         }
     }
 
+    @Override
+    public byte[] getRequest() {
+        return txBuffer;
+    }
 }

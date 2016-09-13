@@ -1,12 +1,11 @@
 package rastro.controller;
 
-import rastro.controller.CommController.CommResult;
+import java.nio.charset.StandardCharsets;
 
-public abstract class RastroCommand {
+public abstract class RastroCommand implements ICommCommand {
 
     protected byte[] txBuffer;
     protected byte[] rxBuffer;
-    protected CommController comCtrl;
     protected int lineLen;
     protected static final byte[] ACK = {'A', 'C', 'K'};
     protected static final byte[] NAK = {'N', 'A', 'K'};
@@ -46,9 +45,8 @@ public abstract class RastroCommand {
         0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
         0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040 };
 
-    public RastroCommand(int lineLength, CommController commController) {
+    public RastroCommand(int lineLength) {
         lineLen = lineLength;
-        comCtrl = commController;
         rxBuffer = new byte[ACK.length];
     }
 
@@ -58,21 +56,6 @@ public abstract class RastroCommand {
         }
     };
     
-    protected CommResult send() {
-        computeCRC16(txBuffer);
-        synchronized (comCtrl) {
-            int i = N_RETRY;
-            while (--i >= 0) {
-                comCtrl.write(txBuffer);
-                int rxLen = comCtrl.read(rxBuffer);
-                if (rxLen == ACK.length && rxBuffer.equals(ACK)) {
-                    return CommResult.ok;
-                }
-            }
-            return CommResult.error;
-        }
-    }
-    
     protected static void computeCRC16(byte[] data) {
         int res = 0;
         for (int i = 0; i < data.length - 2; i++) {
@@ -80,5 +63,23 @@ public abstract class RastroCommand {
         }
         data[data.length - 2] = (byte)(res >>> 8);
         data[data.length - 1] = (byte)(res & 0xFF);
+    }
+    
+    @Override
+    public boolean parseResponse(int bytesRead) {
+        if (bytesRead == ACK.length) {
+            return (new String(rxBuffer, StandardCharsets.US_ASCII)).equals(ACK);
+        }
+        return false;
+    }
+    
+    @Override
+    public int getTimeout() {
+        return DEFAULT_TIMEOUT;
+    }
+        
+    @Override
+    public byte[] getResponseBufer() {
+        return rxBuffer;
     }
 }

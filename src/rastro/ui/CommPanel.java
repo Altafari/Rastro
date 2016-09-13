@@ -79,7 +79,7 @@ public class CommPanel extends BorderedTitledPanel {
                     linkStatus.setText("Error");
                 }
                 break;
-            case "test":
+           /* case "test":
                 (new Thread(new Runnable() {
                     public void run() {
                         byte[] data = new byte[] { (byte) 'h', (byte) 'i' };
@@ -92,7 +92,7 @@ public class CommPanel extends BorderedTitledPanel {
                     }
                 })).start();
                 break;
-
+*/
             default:
             }
         }

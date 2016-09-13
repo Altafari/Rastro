@@ -4,9 +4,17 @@ import javax.swing.*;
 
 import rastro.controller.CommController;
 import rastro.controller.ImageController;
+import rastro.model.CncSettings;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
 
 public class MainDialogScene {
     private static void createAndShowGUI() {
@@ -39,6 +47,6 @@ public class MainDialogScene {
             public void run() {
                 createAndShowGUI();
             }
-        });
+        });       
     }
 }

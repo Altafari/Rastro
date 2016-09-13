@@ -11,7 +11,12 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -19,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.Timer;
 
 public class CncPositioningPanel extends BorderedTitledPanel {
 
@@ -28,9 +32,9 @@ public class CncPositioningPanel extends BorderedTitledPanel {
      */
     private static final long serialVersionUID = 1L;
     private static final Dimension CTRL_PAD_SIZE = new Dimension(102, 102);
-    private static final int KEY_REPEAT_INTERVAL_MS = 100;
-    private static final int KEY_DELAY_INTERVAL_MS = 300;
-    private enum ButtonDir {up, right, down, left};
+    private ArrayList<ParamLabel> paramLabelList; 
+    private enum ButtonDir {UP, RIGHT, DOWN, LEFT};
+    public enum CoordName {X, Y};
     private JSlider slider;
     
     private ActionListener btnListener = new ActionListener() {
@@ -41,6 +45,33 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         }
         
     };
+    
+    private class ParamLabel extends JLabel {
+        
+        /**
+         * 
+         */
+        private final CoordName coordName;
+        private final int cmdNo;
+        private static final long serialVersionUID = 1L;
+
+        public ParamLabel(CoordName cn, int commandNo) {
+            super();
+            coordName = cn;
+            cmdNo = commandNo;
+            formatText(300);
+        }
+        
+        public void updateText(InputStream is, OutputStream os) {
+            
+        }
+        
+        private void formatText(int val) {
+            String numStr = val >= 0 ? Integer.toString(val) : "";
+            this.setText(coordName.name() + ": " + numStr);
+        }
+        
+    }
     
     private class ArrowButton extends JButton {
         /**
@@ -69,42 +100,27 @@ public class CncPositioningPanel extends BorderedTitledPanel {
          * 
          */
         private static final long serialVersionUID = 1L;
-        private int keyCode;
-        private Timer repeatTimer;
         
         public CenterButton() {
             this.setToolTipText("Click here, and use keyboard buttons to move laser");
-            repeatTimer = new Timer(KEY_REPEAT_INTERVAL_MS, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-                    onKeyPressed(keyCode);
-                }                
-            });
-            repeatTimer.setInitialDelay(KEY_DELAY_INTERVAL_MS);
             this.addKeyListener(new KeyListener() {
 
                 @Override
                 public void keyPressed(KeyEvent event) {
-                    switch (event.getKeyCode()) {
+                    int keyCode = event.getKeyCode();
+                    switch (keyCode) {
                         case KeyEvent.VK_UP:
                         case KeyEvent.VK_LEFT:
                         case KeyEvent.VK_RIGHT:
                         case KeyEvent.VK_DOWN:
-                            keyCode = event.getKeyCode();
                             onKeyPressed(keyCode);
-                            repeatTimer.restart();
                             break;
                         default:
                     }
                 }
-
                 @Override
                 public void keyReleased(KeyEvent event) {
-                    if (keyCode == event.getKeyCode()) {
-                        repeatTimer.stop();
-                    }
                 }
-
                 @Override
                 public void keyTyped(KeyEvent event) {                    
                 }
@@ -114,17 +130,53 @@ public class CncPositioningPanel extends BorderedTitledPanel {
 
     public CncPositioningPanel() {
         super("CNC Positioning");
+        paramLabelList = new ArrayList<ParamLabel>(8);
+        paramLabelList.add(new ParamLabel(CoordName.X, 33));
+        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
+        paramLabelList.add(new ParamLabel(CoordName.X, 33));
+        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
+        paramLabelList.add(new ParamLabel(CoordName.X, 33));
+        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
+        paramLabelList.add(new ParamLabel(CoordName.X, 33));
+        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
+        Iterator<ParamLabel> it = paramLabelList.iterator(); 
+        
+        JPanel mvPar = new JPanel(new GridLayout(4, 2));
+        mvPar.add(new JLabel("Max. travel"));
+        JPanel maxTravel = new JPanel(new GridLayout(1, 2));                      
+        maxTravel.add(it.next());
+        maxTravel.add(it.next());
+        mvPar.add(maxTravel);
+                
+        mvPar.add(new JLabel("Max. speed"));
+        JPanel maxSpeed = new JPanel(new GridLayout(1, 2));
+        maxSpeed.add(it.next());
+        maxSpeed.add(it.next());
+        mvPar.add(maxSpeed);
+        
+        mvPar.add(new JLabel("Acc. rate"));
+        JPanel accRate = new JPanel(new GridLayout(1, 2));
+        accRate.add(it.next());
+        accRate.add(it.next());
+        mvPar.add(accRate);        
+        
+        mvPar.add(new JLabel("Steps / mm"));
+        JPanel stepsMm = new JPanel(new GridLayout(1, 2));
+        stepsMm.add(it.next());
+        stepsMm.add(it.next());
+        mvPar.add(stepsMm);
+        
         JPanel moveCtrl = new JPanel(new GridLayout(3, 3));
         moveCtrl.setPreferredSize(CTRL_PAD_SIZE);
         moveCtrl.setMaximumSize(CTRL_PAD_SIZE);
         moveCtrl.add(Box.createGlue());
-        moveCtrl.add(new ArrowButton(ButtonDir.up));
+        moveCtrl.add(new ArrowButton(ButtonDir.UP));
         moveCtrl.add(Box.createGlue());
-        moveCtrl.add(new ArrowButton(ButtonDir.left));
+        moveCtrl.add(new ArrowButton(ButtonDir.LEFT));
         moveCtrl.add(new CenterButton());
-        moveCtrl.add(new ArrowButton(ButtonDir.right));
+        moveCtrl.add(new ArrowButton(ButtonDir.RIGHT));
         moveCtrl.add(Box.createGlue());
-        moveCtrl.add(new ArrowButton(ButtonDir.down));
+        moveCtrl.add(new ArrowButton(ButtonDir.DOWN));
         moveCtrl.add(Box.createGlue());
         slider = new JSlider(JSlider.VERTICAL, 0, 9, 6);
         slider.setMajorTickSpacing(3);
@@ -137,6 +189,7 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         labelTable.put(6, new JLabel("1"));
         labelTable.put(9, new JLabel("10"));
         slider.setLabelTable(labelTable);
+        this.add(mvPar);
         this.add(Box.createHorizontalGlue());
         this.add(slider);
         this.add(Box.createHorizontalStrut(PADDING_LARGE));
@@ -151,5 +204,11 @@ public class CncPositioningPanel extends BorderedTitledPanel {
     
     private void onKeyPressed(int keyCode) {
         System.out.println(keyCode);
+    }
+    
+    private void updateParams(InputStream is, OutputStream os) {
+        for (ParamLabel pl : paramLabelList) {
+           pl.updateText(is, os);
+        }
     }
 }

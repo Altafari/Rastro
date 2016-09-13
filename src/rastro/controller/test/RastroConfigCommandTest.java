@@ -47,6 +47,7 @@ public class RastroConfigCommandTest {
         final int[] LINE_OFFSET = {22, 1582, 7443, 8887};
         final int[] EXP_TIME = {1506, 41, 4577, 6896};
         final boolean[] MODE = {false, false, true, false};
+        // TODO: change test
         Mockito.when(commCtrl.write(Mockito.any(byte[].class))).thenAnswer(
             new Answer<CommResult>() {
                 @Override
@@ -68,11 +69,11 @@ public class RastroConfigCommandTest {
             });
         for (int i = 0; i < MODE.length; i++) {
             testConfig.set(i);          
-            RastroConfigCommand rc = new RastroConfigCommand(LINE_LEN[i], commCtrl);
+            RastroConfigCommand rc = new RastroConfigCommand(LINE_LEN[i]);
             rc.setOffset(LINE_OFFSET[i]);
             rc.setExpTime(EXP_TIME[i]);
             rc.setScanMode(MODE[i]);
-            rc.sendConfig();           
+            commCtrl.sendCommand(rc);
         }
     }
 }
