@@ -19,6 +19,7 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -32,6 +33,7 @@ public class CncPositioningPanel extends BorderedTitledPanel {
      */
     private static final long serialVersionUID = 1L;
     private static final Dimension CTRL_PAD_SIZE = new Dimension(102, 102);
+    private static final Dimension LABEL_SIZE = new Dimension(64, 22);
     private ArrayList<ParamLabel> paramLabelList; 
     private enum ButtonDir {UP, RIGHT, DOWN, LEFT};
     public enum CoordName {X, Y};
@@ -59,16 +61,16 @@ public class CncPositioningPanel extends BorderedTitledPanel {
             super();
             coordName = cn;
             cmdNo = commandNo;
-            formatText(300);
+            this.setPreferredSize(LABEL_SIZE);
+            formatText(300.0f);
         }
         
         public void updateText(InputStream is, OutputStream os) {
             
         }
         
-        private void formatText(int val) {
-            String numStr = val >= 0 ? Integer.toString(val) : "";
-            this.setText(coordName.name() + ": " + numStr);
+        private void formatText(float val) {
+            this.setText(String.format("%s: %4.2f", coordName.name(), val));
         }
         
     }
@@ -141,30 +143,39 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         paramLabelList.add(new ParamLabel(CoordName.Y, 34));
         Iterator<ParamLabel> it = paramLabelList.iterator(); 
         
-        JPanel mvPar = new JPanel(new GridLayout(4, 2));
+        JPanel mvPar = new JPanel(new GridLayout(4, 3));
         mvPar.add(new JLabel("Max. travel"));
-        JPanel maxTravel = new JPanel(new GridLayout(1, 2));                      
-        maxTravel.add(it.next());
-        maxTravel.add(it.next());
-        mvPar.add(maxTravel);
-                
+        mvPar.add(it.next());
+        mvPar.add(it.next());
         mvPar.add(new JLabel("Max. speed"));
-        JPanel maxSpeed = new JPanel(new GridLayout(1, 2));
-        maxSpeed.add(it.next());
-        maxSpeed.add(it.next());
-        mvPar.add(maxSpeed);
-        
+        mvPar.add(it.next());
+        mvPar.add(it.next());
         mvPar.add(new JLabel("Acc. rate"));
-        JPanel accRate = new JPanel(new GridLayout(1, 2));
-        accRate.add(it.next());
-        accRate.add(it.next());
-        mvPar.add(accRate);        
-        
+        mvPar.add(it.next());
+        mvPar.add(it.next());
         mvPar.add(new JLabel("Steps / mm"));
-        JPanel stepsMm = new JPanel(new GridLayout(1, 2));
-        stepsMm.add(it.next());
-        stepsMm.add(it.next());
-        mvPar.add(stepsMm);
+        mvPar.add(it.next());
+        mvPar.add(it.next());
+
+        JPanel sliderPanel = new JPanel();
+        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.PAGE_AXIS));
+        slider = new JSlider(JSlider.VERTICAL, 0, 9, 6);
+        slider.setMajorTickSpacing(3);
+        slider.setMinorTickSpacing(1);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        Hashtable<Object, Object> labelTable = new Hashtable<Object, Object>();
+        labelTable.put(0, new JLabel("0.01"));
+        labelTable.put(3, new JLabel("0.1"));
+        labelTable.put(6, new JLabel("1"));
+        labelTable.put(9, new JLabel("10"));
+        slider.setLabelTable(labelTable);
+        slider.setAlignmentX(CENTER_ALIGNMENT);
+        JLabel sliderLabel = new JLabel("Step, mm");
+        sliderLabel.setAlignmentX(CENTER_ALIGNMENT);
+        sliderPanel.add(sliderLabel);
+        sliderPanel.add(Box.createVerticalStrut(PADDING_SMALL));
+        sliderPanel.add(slider);
         
         JPanel moveCtrl = new JPanel(new GridLayout(3, 3));
         moveCtrl.setPreferredSize(CTRL_PAD_SIZE);
@@ -178,20 +189,9 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         moveCtrl.add(Box.createGlue());
         moveCtrl.add(new ArrowButton(ButtonDir.DOWN));
         moveCtrl.add(Box.createGlue());
-        slider = new JSlider(JSlider.VERTICAL, 0, 9, 6);
-        slider.setMajorTickSpacing(3);
-        slider.setMinorTickSpacing(1);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        Hashtable<Object, Object> labelTable = new Hashtable<Object, Object>();
-        labelTable.put(0, new JLabel("0.01"));
-        labelTable.put(3, new JLabel("0.1"));
-        labelTable.put(6, new JLabel("1"));
-        labelTable.put(9, new JLabel("10"));
-        slider.setLabelTable(labelTable);
+
         this.add(mvPar);
-        this.add(Box.createHorizontalGlue());
-        this.add(slider);
+        this.add(sliderPanel);
         this.add(Box.createHorizontalStrut(PADDING_LARGE));
         this.add(moveCtrl);
         this.add(Box.createHorizontalStrut(PADDING_LARGE));

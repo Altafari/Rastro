@@ -1,6 +1,6 @@
 package rastro.controller;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public abstract class RastroCommand implements ICommCommand {
 
@@ -68,7 +68,7 @@ public abstract class RastroCommand implements ICommCommand {
     @Override
     public boolean parseResponse(int bytesRead) {
         if (bytesRead == ACK.length) {
-            return (new String(rxBuffer, StandardCharsets.US_ASCII)).equals(ACK);
+            return Arrays.equals(rxBuffer, ACK);
         }
         return false;
     }
