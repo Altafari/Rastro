@@ -11,11 +11,10 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -25,6 +24,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+
+import rastro.model.CncSettings.GrblSetting;
 
 public class CncPositioningPanel extends BorderedTitledPanel {
 
@@ -53,26 +54,27 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         /**
          * 
          */
-        private final CoordName coordName;
-        private final int cmdNo;
+        public final GrblSetting sId;
+        private final CoordName coordName;        
         private static final long serialVersionUID = 1L;
 
-        public ParamLabel(CoordName cn, int commandNo) {
+        public ParamLabel(CoordName cn, GrblSetting settingId) {
             super();
             coordName = cn;
-            cmdNo = commandNo;
+            sId = settingId;
             this.setPreferredSize(LABEL_SIZE);
             formatText(300.0f);
         }
-        
-        public void updateText(InputStream is, OutputStream os) {
-            
+
+        private void formatText(Float val) {
+            String strVal;
+            if (val != null) {
+                strVal = String.format("%4.2f", val);
+            } else {
+                strVal = "";
+            }
+            this.setText(String.format("%s: %s", coordName.name(), strVal));
         }
-        
-        private void formatText(float val) {
-            this.setText(String.format("%s: %4.2f", coordName.name(), val));
-        }
-        
     }
     
     private class ArrowButton extends JButton {
@@ -133,14 +135,14 @@ public class CncPositioningPanel extends BorderedTitledPanel {
     public CncPositioningPanel() {
         super("CNC Positioning");
         paramLabelList = new ArrayList<ParamLabel>(8);
-        paramLabelList.add(new ParamLabel(CoordName.X, 33));
-        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
-        paramLabelList.add(new ParamLabel(CoordName.X, 33));
-        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
-        paramLabelList.add(new ParamLabel(CoordName.X, 33));
-        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
-        paramLabelList.add(new ParamLabel(CoordName.X, 33));
-        paramLabelList.add(new ParamLabel(CoordName.Y, 34));
+        paramLabelList.add(new ParamLabel(CoordName.X, GrblSetting.MAX_TRAVEL_X));
+        paramLabelList.add(new ParamLabel(CoordName.Y, GrblSetting.MAX_TRAVEL_Y));
+        paramLabelList.add(new ParamLabel(CoordName.X, GrblSetting.MAX_RATE_X));
+        paramLabelList.add(new ParamLabel(CoordName.Y, GrblSetting.MAX_RATE_Y));
+        paramLabelList.add(new ParamLabel(CoordName.X, GrblSetting.ACC_X));
+        paramLabelList.add(new ParamLabel(CoordName.Y, GrblSetting.ACC_Y));
+        paramLabelList.add(new ParamLabel(CoordName.X, GrblSetting.STEP_PER_MM_X));
+        paramLabelList.add(new ParamLabel(CoordName.Y, GrblSetting.STEP_PER_MM_Y));
         Iterator<ParamLabel> it = paramLabelList.iterator(); 
         
         JPanel mvPar = new JPanel(new GridLayout(4, 3));
@@ -206,9 +208,9 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         System.out.println(keyCode);
     }
     
-    private void updateParams(InputStream is, OutputStream os) {
-        for (ParamLabel pl : paramLabelList) {
-           pl.updateText(is, os);
+    private void updateParams(Map<GrblSetting, Float> settings) {
+        for (ParamLabel p : paramLabelList) {
+            p.formatText(settings.get(p.sId));
         }
     }
 }

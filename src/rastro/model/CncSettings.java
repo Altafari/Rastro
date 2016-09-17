@@ -2,24 +2,51 @@ package rastro.model;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import rastro.controller.ICommCommand;
 
-public class CncSettings implements ICommCommand {
+public class CncSettings {
     
     public enum GrblSetting {STEP_PER_MM_X, STEP_PER_MM_Y, MAX_RATE_X,
             MAX_RATE_Y, ACC_X, ACC_Y, MAX_TRAVEL_X, MAX_TRAVEL_Y};
-            
-    private static final Pattern pattern = Pattern.compile("\\d+\\.\\d+");
+
     private final HashMap<GrblSetting, Float> settingsMap;
     private final GrblSettingParser parser;
-    private final byte[] responseBuffer;
-    private static final int RESP_BUFF_SIZE = 2048;
     
+    public final class Load implements ICommCommand {
+        
+        private static final int RESP_BUFF_SIZE = 2048;
+        private final byte[] responseBuffer = new byte[RESP_BUFF_SIZE];
+        
+        @Override
+        public byte[] getRequest() {
+            return "$$\n".getBytes(StandardCharsets.US_ASCII);
+        }
+
+        @Override
+        public boolean parseResponse(int bytesRead) {        
+            return parseSettings(new String(
+                    Arrays.copyOfRange(responseBuffer, 0, bytesRead), StandardCharsets.US_ASCII));
+        }
+
+        @Override
+        public int getTimeout() {
+            return DEFAULT_TIMEOUT;
+        }
+
+        @Override
+        public byte[] getResponseBufer() {
+            return responseBuffer;
+        }        
+    }
+
     private class GrblSettingParser {
+        private final Pattern pattern = Pattern.compile("\\d+\\.\\d+");
         private final String prefix;
         private final GrblSetting key;
         private GrblSettingParser next;
@@ -53,9 +80,9 @@ public class CncSettings implements ICommCommand {
             }
         }
     };
+
     public CncSettings() {
-        settingsMap = new HashMap<GrblSetting, Float>();
-        responseBuffer = new byte[RESP_BUFF_SIZE];
+        settingsMap = new HashMap<GrblSetting, Float>();        
         parser = new GrblSettingParser("$100=", GrblSetting.STEP_PER_MM_X);
         parser.setNext(new GrblSettingParser("$101=", GrblSetting.STEP_PER_MM_Y))
         .setNext(new GrblSettingParser("$110=", GrblSetting.MAX_RATE_X))
@@ -64,6 +91,10 @@ public class CncSettings implements ICommCommand {
         .setNext(new GrblSettingParser("$121=", GrblSetting.ACC_Y))
         .setNext(new GrblSettingParser("$130=", GrblSetting.MAX_TRAVEL_X))
         .setNext(new GrblSettingParser("$131=", GrblSetting.MAX_TRAVEL_Y));        
+    }
+    
+    public Map<GrblSetting, Float> getSettings() {
+        return Collections.unmodifiableMap(settingsMap);
     }
     
     private boolean parseSettings(String settings) {
@@ -78,26 +109,5 @@ public class CncSettings implements ICommCommand {
             }
         }
         return true;
-    }
-
-    @Override
-    public byte[] getRequest() {
-        return "$$\n".getBytes(StandardCharsets.US_ASCII);
-    }
-
-    @Override
-    public boolean parseResponse(int bytesRead) {        
-        return parseSettings(new String(
-                Arrays.copyOfRange(responseBuffer, 0, bytesRead), StandardCharsets.US_ASCII));        
-    }
-
-    @Override
-    public int getTimeout() {
-        return DEFAULT_TIMEOUT;
-    }
-
-    @Override
-    public byte[] getResponseBufer() {
-        return responseBuffer;
     }
 }
