@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
+import rastro.system.SystemManager;
 
 public class CommPanel extends BorderedTitledPanel {
 
@@ -29,7 +30,7 @@ public class CommPanel extends BorderedTitledPanel {
     private static final Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
     private static final Dimension DIM_LINK_FIELD = new Dimension(40, 22);
 
-    CommPanel(String title, String[] allowedBaudRates, CommController controller) {
+    public CommPanel(String title, String[] allowedBaudRates, CommController controller) {
         super(title);
         cCon = controller;
         comPortName = new JComboBox<String>(CommController.getPortList());
@@ -79,20 +80,13 @@ public class CommPanel extends BorderedTitledPanel {
                     linkStatus.setText("Error");
                 }
                 break;
-           /* case "test":
+                case "test":
                 (new Thread(new Runnable() {
                     public void run() {
-                        byte[] data = new byte[] { (byte) 'h', (byte) 'i' };
-                        cCon.write(data);
-                        byte[] rcv = new byte[2];
-                        int cnt = cCon.read(rcv);
-                        if (cnt == 2 && rcv[0] == (byte) 'h' && rcv[1] == (byte) 'i') {
-                            linkStatus.setText("Test passed");
-                        }
+                        SystemManager.getInstance().loadGrblSettings();
                     }
                 })).start();
                 break;
-*/
             default:
             }
         }

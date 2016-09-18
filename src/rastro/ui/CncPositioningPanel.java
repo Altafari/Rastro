@@ -208,7 +208,7 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         System.out.println(keyCode);
     }
     
-    private void updateParams(Map<GrblSetting, Float> settings) {
+    public void updateParams(Map<GrblSetting, Float> settings) {
         for (ParamLabel p : paramLabelList) {
             p.formatText(settings.get(p.sId));
         }

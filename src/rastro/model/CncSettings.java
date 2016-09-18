@@ -18,14 +18,15 @@ public class CncSettings {
     private final HashMap<GrblSetting, Float> settingsMap;
     private final GrblSettingParser parser;
     
-    public final class Load implements ICommCommand {
+    private final class Load implements ICommCommand {
         
         private static final int RESP_BUFF_SIZE = 2048;
         private final byte[] responseBuffer = new byte[RESP_BUFF_SIZE];
         
         @Override
         public byte[] getRequest() {
-            return "$$\n".getBytes(StandardCharsets.US_ASCII);
+            //return "$$\n".getBytes(StandardCharsets.US_ASCII);
+            return "G01 X-5.0\n".getBytes(StandardCharsets.US_ASCII);
         }
 
         @Override
@@ -66,7 +67,8 @@ public class CncSettings {
                 if (next != null) {
                     next.parseLine(line);
                 }
-            }
+                return;
+            }            
             Matcher m = pattern.matcher(line.substring(prefix.length()));
             if (m.find()) {
                 String s = m.group();
@@ -95,6 +97,10 @@ public class CncSettings {
     
     public Map<GrblSetting, Float> getSettings() {
         return Collections.unmodifiableMap(settingsMap);
+    }
+    
+    public ICommCommand getLoadCommand() {
+        return new Load();
     }
     
     private boolean parseSettings(String settings) {

@@ -59,7 +59,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
         }       
     };    
     
-    ImageControlPanel(ImageController imgController) {
+    public ImageControlPanel(ImageController imgController) {
         super("Input image");
         fc = new JFileChooser();
         fc.setFileFilter(new FileFilter() {

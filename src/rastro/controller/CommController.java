@@ -1,6 +1,8 @@
 package rastro.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +22,8 @@ public class CommController {
     private int baudRate = 115200;
     private SerialPort sPort = null;
     private static Set<String> allocatedPorts = new HashSet<String>();
+    private InputStream in;
+    private OutputStream out;
 
     public CommController() {
     }
@@ -48,6 +52,12 @@ public class CommController {
         } catch (UnsupportedCommOperationException e) {
             return CommResult.error;
         }
+        try {
+            in = sPort.getInputStream();
+            out = sPort.getOutputStream();
+        } catch (IOException e) {
+            return CommResult.error;
+        }        
         return CommResult.ok;
     }
 
@@ -95,7 +105,7 @@ public class CommController {
 
     public CommResult write(byte[] data) {
         try {
-            sPort.getOutputStream().write(data);
+            out.write(data);
         } catch (IOException | NullPointerException e) {
             return CommResult.error;
         }
@@ -104,13 +114,18 @@ public class CommController {
   
     public int read(byte[] buff, int timeout) {
         try {
-            sPort.enableReceiveThreshold(buff.length);
+        //    sPort.enableReceiveThreshold(buff.length);            
             if (timeout > 0) {
                 sPort.enableReceiveTimeout(timeout);
             } else {
                 sPort.disableReceiveTimeout();
             }
-            return sPort.getInputStream().read(buff);
+            int res = 0;
+            while (res != -1) {
+                res = in.read(buff);
+            }
+            System.out.println(new String(buff));
+            return res;
         } catch (IOException | NullPointerException | UnsupportedCommOperationException e) {
             return -1;
         }

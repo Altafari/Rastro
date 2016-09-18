@@ -2,21 +2,11 @@ package rastro.ui;
 
 import javax.swing.*;
 
-import rastro.controller.CommController;
-import rastro.controller.ImageController;
-import rastro.model.CncSettings;
-
+import rastro.system.SystemManager;
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Scanner;
 
-public class MainDialogScene {
+public class MainDialog {
     private static void createAndShowGUI() {
         JFrame frame = new JFrame("Rastro v1.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,17 +16,15 @@ public class MainDialogScene {
     }
 
     private static void addComponentsToPane(Container pane) {
+        SystemManager sysMgr = SystemManager.getInstance();
         JPanel ctrlPanel = new JPanel();
         ctrlPanel.setLayout(new BoxLayout(ctrlPanel, BoxLayout.PAGE_AXIS));
-        CommPanel grblComm = new CommPanel("GRBL", new String[] { "115200", "9600" }, new CommController());
-        CommPanel rastroComm = new CommPanel("Rastro", new String[] { "115200" }, new CommController());
-        ImageInfoPanel imageInfoPanel = new ImageInfoPanel();
-        ctrlPanel.add(grblComm);
-        ctrlPanel.add(rastroComm);
-        ctrlPanel.add(new ImageControlPanel(new ImageController(imageInfoPanel)));
-        ctrlPanel.add(imageInfoPanel);
-        ctrlPanel.add(new CncOriginPanel());
-        ctrlPanel.add(new CncPositioningPanel());
+        ctrlPanel.add(sysMgr.getGrblCommPanel());
+        ctrlPanel.add(sysMgr.getRastroCommPanel());
+        ctrlPanel.add(sysMgr.getImageControlPanel());
+        ctrlPanel.add(sysMgr.getImageInfoPanel());
+        ctrlPanel.add(sysMgr.getCncOriginPanel());
+        ctrlPanel.add(sysMgr.getCncPositioningPanel());
         ctrlPanel.add(Box.createVerticalGlue());
         pane.add(ctrlPanel, BorderLayout.LINE_START);        
         pane.add(new JPanel(), BorderLayout.LINE_END);

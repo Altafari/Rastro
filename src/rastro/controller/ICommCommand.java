@@ -5,5 +5,5 @@ public interface ICommCommand {
     byte[] getResponseBufer();
     boolean parseResponse(int bytesRead);
     int getTimeout();
-    final int DEFAULT_TIMEOUT = 200;
+    final int DEFAULT_TIMEOUT = 2000;
 }
