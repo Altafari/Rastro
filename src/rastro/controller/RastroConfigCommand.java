@@ -1,5 +1,8 @@
 package rastro.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 public class RastroConfigCommand extends RastroCommand {
     
     public static final byte MODE_ZIGZAG = 0;
@@ -35,7 +38,7 @@ public class RastroConfigCommand extends RastroCommand {
     }
     
     @Override
-    public byte[] getRequest() {
+    public boolean sendData(OutputStream os) {
         putHeader(CFG_HDR);
         int offset = CFG_HDR.length;
         offset = putShort((short) lineLen, offset);
@@ -43,6 +46,11 @@ public class RastroConfigCommand extends RastroCommand {
         offset = putShort((short) expTime, offset);
         txBuffer[offset] = mode;
         computeCRC16(txBuffer);
-        return txBuffer;
+        try {
+            os.write(txBuffer);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 }

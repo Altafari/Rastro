@@ -16,7 +16,7 @@ import gnu.io.UnsupportedCommOperationException;
 
 public class CommController {
     public enum CommResult {
-        ok, error, parseError, noResponse
+        ok, error
     };
     private String portName = "";
     private int baudRate = 115200;
@@ -24,6 +24,7 @@ public class CommController {
     private static Set<String> allocatedPorts = new HashSet<String>();
     private InputStream in;
     private OutputStream out;
+    private final int INP_BUFF_SIZE = 2048;
 
     public CommController() {
     }
@@ -49,15 +50,12 @@ public class CommController {
         sPort = (SerialPort) port;
         try {
             sPort.setSerialPortParams(baudRate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-        } catch (UnsupportedCommOperationException e) {
+            sPort.setInputBufferSize(INP_BUFF_SIZE);
+            in = sPort.getInputStream();
+            out = sPort.getOutputStream();            
+        } catch (UnsupportedCommOperationException | IOException e) {
             return CommResult.error;
         }
-        try {
-            in = sPort.getInputStream();
-            out = sPort.getOutputStream();
-        } catch (IOException e) {
-            return CommResult.error;
-        }        
         return CommResult.ok;
     }
 
@@ -103,47 +101,18 @@ public class CommController {
         baudRate = rate;
     }
 
-    public CommResult write(byte[] data) {
+    public CommResult sendCommand(ICommCommand cmd) {
         try {
-            out.write(data);
-        } catch (IOException | NullPointerException e) {
+            sPort.enableReceiveTimeout(cmd.getTimeout());
+        } catch (UnsupportedCommOperationException e) {
+            return CommResult.error;
+        }
+        if (!cmd.sendData(out)) {
+            return CommResult.error;
+        }
+        if( !cmd.receiveData(in)) {
             return CommResult.error;
         }
         return CommResult.ok;
-    }
-  
-    public int read(byte[] buff, int timeout) {
-        try {
-        //    sPort.enableReceiveThreshold(buff.length);            
-            if (timeout > 0) {
-                sPort.enableReceiveTimeout(timeout);
-            } else {
-                sPort.disableReceiveTimeout();
-            }
-            int res = 0;
-            while (res != -1) {
-                res = in.read(buff);
-            }
-            System.out.println(new String(buff));
-            return res;
-        } catch (IOException | NullPointerException | UnsupportedCommOperationException e) {
-            return -1;
-        }
-    }
-    
-    public CommResult sendCommand(ICommCommand cmd) {
-        if (write(cmd.getRequest()) != CommResult.ok) {
-            return CommResult.error;
-        }
-        int bytesRead = read(cmd.getResponseBufer(), cmd.getTimeout());
-        if (bytesRead >= 0) {
-            if (!cmd.parseResponse(bytesRead)) {
-                return CommResult.parseError;
-            } else {
-                return CommResult.ok;
-            }            
-        } else {
-            return CommResult.noResponse;
-        }
     }
 }

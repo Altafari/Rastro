@@ -2,6 +2,9 @@ package rastro.controller.test;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -14,6 +17,14 @@ import rastro.controller.*;
 
 public class RastroLineCommandTest {
 
+    private class MockStream extends OutputStream {
+
+        @Override
+        public void write(int b) throws IOException {         
+        }
+    }
+    
+    
     @BeforeClass
     public static void runOnceBeforeClass() {            
     }
@@ -29,11 +40,15 @@ public class RastroLineCommandTest {
         RastroLineCommand rc = new RastroLineCommand(line.length);
         ICommCommand icc = rc;
         rc.packLine(false, line);
-        byte[] buffer = icc.getRequest();
-        assertEquals('L', buffer[0]);
-        assertEquals('N', buffer[1]);
-        assertEquals(straightLine[2], buffer[2]);
-        assertEquals(straightLine[3], buffer[3]);
+        icc.sendData(new MockStream() {
+            @Override
+            public void write(byte[] buffer) {
+                assertEquals('L', buffer[0]);
+                assertEquals('N', buffer[1]);
+                assertEquals(straightLine[2], buffer[2]);
+                assertEquals(straightLine[3], buffer[3]);
+            }
+        });
     }
 
     @Test
@@ -43,11 +58,15 @@ public class RastroLineCommandTest {
         RastroLineCommand rc = new RastroLineCommand(line.length);
         rc.packLine(true, line);
         ICommCommand icc = rc;
-        byte[] buffer = icc.getRequest();
-        assertEquals('L', buffer[0]);
-        assertEquals('N', buffer[1]);
-        assertEquals(invertedLine[2], buffer[2]);
-        assertEquals(invertedLine[3], buffer[3]);
+        icc.sendData(new MockStream() {
+            @Override
+            public void write(byte[] buffer) {
+                assertEquals('L', buffer[0]);
+                assertEquals('N', buffer[1]);
+                assertEquals(invertedLine[2], buffer[2]);
+                assertEquals(invertedLine[3], buffer[3]);
+            }
+        });
     }
 
     @Test
@@ -56,8 +75,12 @@ public class RastroLineCommandTest {
         RastroLineCommand rc = new RastroLineCommand(line.length);
         rc.packLine(false, line);
         ICommCommand icc = rc;
-        byte[] buffer = icc.getRequest();
-        assertEquals(20, buffer.length);
+        icc.sendData(new MockStream() {
+            @Override
+            public void write(byte[] buffer) {
+                assertEquals(20, buffer.length);
+            }
+        });        
     }
    
     @Test
@@ -70,48 +93,18 @@ public class RastroLineCommandTest {
         RastroLineCommand rc = new RastroLineCommand(line.length);
         rc.packLine(false, line);
         ICommCommand icc = rc;
-        byte buffer[] = icc.getRequest();
-        assertEquals(crcHi, buffer[5]);
-        assertEquals(crcLo, buffer[6]);
+        icc.sendData(new MockStream() {
+            @Override
+            public void write(byte[] buffer) {
+                assertEquals(crcHi, buffer[5]);
+                assertEquals(crcLo, buffer[6]);
+            }
+        });        
     }
 
     @Test
     public void commCommandShouldReturnDefaultTimeout() {
         ICommCommand icc = new RastroLineCommand(10);
         assertEquals(ICommCommand.DEFAULT_TIMEOUT, icc.getTimeout());
-    }
-
-    @Test
-    public void commResponseBufferSizeMustBeCorrect() {
-        ICommCommand icc = new RastroLineCommand(10);
-        assertEquals(3, icc.getResponseBufer().length);
-    }
-
-    @Test
-    public void commResponseShoudReturnFalseIfIncorectNumberOfBytesReceived() {
-        ICommCommand icc = new RastroLineCommand(10);
-        assertEquals(false, icc.parseResponse(2));
-    }
-
-    @Test
-    public void commResponseShoudReturnTrueIfResponseIsAck() {
-        ICommCommand icc = new RastroLineCommand(10);
-        final byte[] ack = {'A', 'C', 'K'};
-        byte[] buffer = icc.getResponseBufer();
-        for (int i = 0; i < ack.length; i++) {
-            buffer[i] = ack[i];
-        }
-        assertEquals(true, icc.parseResponse(3));
-    }
-
-    @Test
-    public void commResponseShoudReturnFalseIfResponseIsNak() {
-        ICommCommand icc = new RastroLineCommand(10);
-        final byte[] ack = {'N', 'A', 'K'};
-        byte[] buffer = icc.getResponseBufer();
-        for (int i = 0; i < ack.length; i++) {
-            buffer[i] = ack[i];
-        }
-        assertEquals(false, icc.parseResponse(3));
-    }
+    }   
 }

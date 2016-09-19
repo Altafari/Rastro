@@ -1,9 +1,11 @@
 package rastro.controller;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public interface ICommCommand {
-    byte[] getRequest();
-    byte[] getResponseBufer();
-    boolean parseResponse(int bytesRead);
+    boolean sendData(OutputStream os);
+    boolean receiveData(InputStream is);
     int getTimeout();
-    final int DEFAULT_TIMEOUT = 2000;
+    final int DEFAULT_TIMEOUT = 200;
 }

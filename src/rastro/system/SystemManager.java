@@ -1,6 +1,7 @@
 package rastro.system;
 
 import rastro.controller.CommController;
+import rastro.controller.CommController.CommResult;
 import rastro.controller.ImageController;
 import rastro.model.CncSettings;
 import rastro.ui.CncOriginPanel;
@@ -85,7 +86,8 @@ public class SystemManager {
     }
     
     public void loadGrblSettings() {
-        grblCommCtrl.sendCommand(cncSettings.getLoadCommand());
-        cncPosPanel.updateParams(cncSettings.getSettings());
+        if (grblCommCtrl.sendCommand(cncSettings.getLoadCommand()) == CommResult.ok) {
+            cncPosPanel.updateParams(cncSettings.getSettings());
+        }
     }
 }

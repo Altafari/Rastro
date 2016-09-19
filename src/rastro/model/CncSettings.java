@@ -1,6 +1,8 @@
 package rastro.model;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,19 +23,7 @@ public class CncSettings {
     private final class Load implements ICommCommand {
         
         private static final int RESP_BUFF_SIZE = 2048;
-        private final byte[] responseBuffer = new byte[RESP_BUFF_SIZE];
-        
-        @Override
-        public byte[] getRequest() {
-            //return "$$\n".getBytes(StandardCharsets.US_ASCII);
-            return "G01 X-5.0\n".getBytes(StandardCharsets.US_ASCII);
-        }
-
-        @Override
-        public boolean parseResponse(int bytesRead) {        
-            return parseSettings(new String(
-                    Arrays.copyOfRange(responseBuffer, 0, bytesRead), StandardCharsets.US_ASCII));
-        }
+        private final byte[] rxBuffer = new byte[RESP_BUFF_SIZE];
 
         @Override
         public int getTimeout() {
@@ -41,8 +31,34 @@ public class CncSettings {
         }
 
         @Override
-        public byte[] getResponseBufer() {
-            return responseBuffer;
+        public boolean sendData(OutputStream os) {
+            try {
+                os.write("$$\n".getBytes());
+            } catch (IOException e) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean receiveData(InputStream is) {
+            int bytesRead;
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                try {
+                    bytesRead = is.read(rxBuffer);
+                } catch (IOException e) {
+                    return false;
+                }
+                if (bytesRead > 0) {                   
+                    sb.append(new String(Arrays.copyOfRange(rxBuffer, 0, bytesRead)));
+                    if (sb.indexOf("\nok") != -1) {
+                        return parseSettings(sb.toString());
+                    }
+                } else {
+                    return false;
+                }                
+            }
         }        
     }
 

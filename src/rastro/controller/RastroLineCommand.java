@@ -1,5 +1,8 @@
 package rastro.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 public class RastroLineCommand extends RastroCommand {
 
     private static final byte LINE_HDR[] = {'L', 'N'};  
@@ -44,7 +47,12 @@ public class RastroLineCommand extends RastroCommand {
     }
 
     @Override
-    public byte[] getRequest() {
-        return txBuffer;
+    public boolean sendData(OutputStream os) {
+        try {
+            os.write(txBuffer);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 }

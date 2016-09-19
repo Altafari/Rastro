@@ -1,6 +1,6 @@
 package rastro.controller;
 
-import java.util.Arrays;
+import java.io.InputStream;
 
 public abstract class RastroCommand implements ICommCommand {
 
@@ -66,20 +66,13 @@ public abstract class RastroCommand implements ICommCommand {
     }
     
     @Override
-    public boolean parseResponse(int bytesRead) {
-        if (bytesRead == ACK.length) {
-            return Arrays.equals(rxBuffer, ACK);
-        }
-        return false;
+    public boolean receiveData(InputStream is) {
+        // TODO Auto-generated method stub
+        return true;
     }
     
     @Override
     public int getTimeout() {
         return DEFAULT_TIMEOUT;
-    }
-        
-    @Override
-    public byte[] getResponseBufer() {
-        return rxBuffer;
     }
 }
