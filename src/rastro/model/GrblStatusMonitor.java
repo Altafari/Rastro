@@ -3,23 +3,33 @@ package rastro.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import rastro.controller.ICommCommand;
 
-public class GrblStatus {
+public class GrblStatusMonitor {
     public enum Mode {Idle, Run, Hold, Door, Home, Alarm, Check};
     private Mode mode;
-    private float[] mPos = {0.0f, 0.0f, 0.0f};
-    private int pBuff;
-    private int rxBuff;
-    private static final byte repSetting = 11;
+    private float[] mPos;
+    private int pBuff;    
+    private Set<IPositionListener> posListeners;
+    private Set<IModeListener> modeListeners;
     private static final Pattern modePattern = Pattern.compile("^([A-Z][a-z]+)");
     private static final Pattern mPosPattern = 
             Pattern.compile("MPos:([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+)");
     private static final Pattern pBuffPattern = Pattern.compile("Buf:([0-9]+)");
-    private static final Pattern rxBuffPattern = Pattern.compile("RX:([0-9]+)");
+    
+    public interface IPositionListener {
+        void onChange(float[] pos);
+    }
+    
+    public interface IModeListener {
+        void onChange(Mode mode);
+    }
     
     private class ReadCommand implements ICommCommand {
 
@@ -59,6 +69,8 @@ public class GrblStatus {
         }
         
         private boolean parseString(String s) {
+            float[] prevPos = mPos.clone();
+            Mode prevMode = mode;
             try {
                 if (!parseMode(s)) {
                     return false;
@@ -69,11 +81,18 @@ public class GrblStatus {
                 if (!parsePBuff(s)) {
                     return false;
                 }
-                if (!parseRxBuff(s)) {
-                    return false;
-                }
             } catch (IllegalArgumentException e) {
                 return false;
+            }
+            if (!Arrays.equals(prevPos, mPos)) {
+                for (IPositionListener l : posListeners) {
+                    l.onChange(mPos.clone());
+                }
+            }
+            if (prevMode != mode) {
+                for (IModeListener l : modeListeners) {
+                    l.onChange(mode);
+                }
             }
             return true;
         }
@@ -106,18 +125,35 @@ public class GrblStatus {
             pBuff = Integer.parseInt(matcher.group(1));
             return true;
         }
-        
-        private boolean parseRxBuff(String s) {
-            Matcher matcher = rxBuffPattern.matcher(s);
-            if (!matcher.find()) {
-                return false;
-            }
-            rxBuff = Integer.parseInt(matcher.group(1));
-            return true;
-        }
+    }
+    
+    public GrblStatusMonitor() {
+        mPos = new float[3];
+        posListeners = new HashSet<IPositionListener>();
+        modeListeners = new HashSet<IModeListener>();
     }
     
     public ICommCommand getReadStatusCommand() {
         return new ReadCommand();
+    }
+    
+    public int getPlannerBufferState() {
+        return pBuff;
+    }
+    
+    public void addPosListener(IPositionListener l) {
+        posListeners.add(l);
+    }
+    
+    public void removePosListener(IPositionListener l) {
+        posListeners.remove(l);
+    }
+    
+    public void addModeListener(IModeListener l) {
+        modeListeners.add(l);
+    }
+    
+    public void removeModeListener(IModeListener l) {
+        modeListeners.remove(l);
     }
 }

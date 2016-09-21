@@ -25,7 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
-import rastro.model.CncSettings.GrblSetting;
+import rastro.model.GrblSettings.GrblSetting;
 
 public class CncPositioningPanel extends BorderedTitledPanel {
 

@@ -3,8 +3,8 @@ package rastro.system;
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
 import rastro.controller.ImageController;
-import rastro.model.CncSettings;
-import rastro.model.GrblStatus;
+import rastro.model.GrblSettings;
+import rastro.model.GrblStatusMonitor;
 import rastro.ui.CncOriginPanel;
 import rastro.ui.CncPositioningPanel;
 import rastro.ui.CommPanel;
@@ -23,10 +23,11 @@ public class SystemManager {
     private CommPanel rastroCommPanel;
     private CncOriginPanel cncOrigPanel;
     private CncPositioningPanel cncPosPanel;
-    private CncSettings cncSettings;
+    private GrblSettings cncSettings;
     private ImageInfoPanel imgInfoPanel;
     private ImageController imgCtrl;
     private ImageControlPanel imgCtrlPanel;
+    private GrblStatusMonitor grblStatusMonitor;
         
     private SystemMode sysMode;
     
@@ -39,10 +40,11 @@ public class SystemManager {
         rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl);
         cncOrigPanel = new CncOriginPanel();
         cncPosPanel = new CncPositioningPanel();
-        cncSettings = new CncSettings();
+        cncSettings = new GrblSettings();
         imgInfoPanel = new ImageInfoPanel();
         imgCtrl = new ImageController(imgInfoPanel);
-        imgCtrlPanel = new ImageControlPanel(imgCtrl);        
+        imgCtrlPanel = new ImageControlPanel(imgCtrl);
+        grblStatusMonitor = new GrblStatusMonitor();
     }
     
     private static synchronized void createNewInstance() {
@@ -88,9 +90,8 @@ public class SystemManager {
     
     public void loadGrblSettings() {
         if (grblCommCtrl.sendCommand(cncSettings.getLoadCommand()) == CommResult.ok) {
-            cncPosPanel.updateParams(cncSettings.getSettings());
-            GrblStatus gs = new GrblStatus();
-            CommResult result = grblCommCtrl.sendCommand(gs.getReadStatusCommand());
+            cncPosPanel.updateParams(cncSettings.getSettings());            
+            CommResult result = grblCommCtrl.sendCommand(grblStatusMonitor.getReadStatusCommand());
         }
     }
 }

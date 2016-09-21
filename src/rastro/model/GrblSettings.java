@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import rastro.controller.ICommCommand;
 
-public class CncSettings {
+public class GrblSettings {
     
     public enum GrblSetting {STEP_PER_MM_X, STEP_PER_MM_Y, MAX_RATE_X,
             MAX_RATE_Y, ACC_X, ACC_Y, MAX_TRAVEL_X, MAX_TRAVEL_Y};
@@ -91,7 +91,7 @@ public class CncSettings {
         }
     };
 
-    public CncSettings() {
+    public GrblSettings() {
         settingsMap = new HashMap<GrblSetting, Float>();        
         parser = new GrblSettingParser("$100=", GrblSetting.STEP_PER_MM_X);
         parser.setNext(new GrblSettingParser("$101=", GrblSetting.STEP_PER_MM_Y))
