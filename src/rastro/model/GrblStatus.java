@@ -15,7 +15,7 @@ public class GrblStatus {
     private int pBuff;
     private int rxBuff;
     private static final byte repSetting = 11;
-    private static final Pattern modePattern = Pattern.compile("([A-Z][a-z]+)");
+    private static final Pattern modePattern = Pattern.compile("^([A-Z][a-z]+)");
     private static final Pattern mPosPattern = 
             Pattern.compile("MPos:([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+)");
     private static final Pattern pBuffPattern = Pattern.compile("Buf:([0-9]+)");
@@ -60,34 +60,61 @@ public class GrblStatus {
         
         private boolean parseString(String s) {
             try {
-                Matcher matcher = modePattern.matcher(s);
-                if (!matcher.find()) {
-                    return false;
-                }            
-                mode = Mode.valueOf(matcher.group(1));            
-                matcher = mPosPattern.matcher(s.substring(matcher.end()));
-                if (!matcher.find()) {
-                    return false;
-                }            
-                for (int i = 0; i < mPos.length; i++) {
-                    mPos[i] = Float.parseFloat(matcher.group(i + 1));
-                }
-                matcher = pBuffPattern.matcher(s.substring(matcher.end()));
-                if (!matcher.find()) {
+                if (!parseMode(s)) {
                     return false;
                 }
-                String ss = matcher.group(1);
-                pBuff = Integer.parseInt(ss);
-                matcher = rxBuffPattern.matcher(s.substring(matcher.end()));
-                if (!matcher.find()) {
+                if (!parseMPos(s)) {
                     return false;
                 }
-                rxBuff = Integer.parseInt(matcher.group(1));
-                return true;
+                if (!parsePBuff(s)) {
+                    return false;
+                }
+                if (!parseRxBuff(s)) {
+                    return false;
+                }
             } catch (IllegalArgumentException e) {
                 return false;
             }
-        }        
+            return true;
+        }
+        
+        private boolean parseMode(String s) {
+            Matcher matcher = modePattern.matcher(s);
+            if (!matcher.find()) {
+                return false;
+            }            
+            mode = Mode.valueOf(matcher.group(1));            
+            return true;
+        }
+        
+        private boolean parseMPos(String s) {
+            Matcher matcher = mPosPattern.matcher(s);
+            if (!matcher.find()) {
+                return false;
+            }            
+            for (int i = 0; i < mPos.length; i++) {
+                mPos[i] = Float.parseFloat(matcher.group(i + 1));
+            }
+            return true;
+        }
+        
+        private boolean parsePBuff(String s) {
+            Matcher matcher = pBuffPattern.matcher(s);
+            if (!matcher.find()) {
+                return false;
+            }
+            pBuff = Integer.parseInt(matcher.group(1));
+            return true;
+        }
+        
+        private boolean parseRxBuff(String s) {
+            Matcher matcher = rxBuffPattern.matcher(s);
+            if (!matcher.find()) {
+                return false;
+            }
+            rxBuff = Integer.parseInt(matcher.group(1));
+            return true;
+        }
     }
     
     public ICommCommand getReadStatusCommand() {
