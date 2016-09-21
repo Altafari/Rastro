@@ -40,8 +40,7 @@ public class RastroConfigCommandTest {
     }
 
     @Test
-    public void sendLineShouldSendProperData() {
-
+    public void sendLineShouldSendProperData() throws IOException {
         for (i = 0; i < MODE.length; i++) {
             RastroConfigCommand rc = new RastroConfigCommand(LINE_LEN[i]);
             rc.setOffset(LINE_OFFSET[i]);

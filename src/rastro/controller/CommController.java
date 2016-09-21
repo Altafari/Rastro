@@ -104,13 +104,13 @@ public class CommController {
     public CommResult sendCommand(ICommCommand cmd) {
         try {
             sPort.enableReceiveTimeout(cmd.getTimeout());
-        } catch (UnsupportedCommOperationException e) {
-            return CommResult.error;
-        }
-        if (!cmd.sendData(out)) {
-            return CommResult.error;
-        }
-        if( !cmd.receiveData(in)) {
+            if (!cmd.sendData(out)) {
+                return CommResult.error;
+            }
+            if( !cmd.receiveData(in)) {
+                return CommResult.error;
+            }
+        } catch (UnsupportedCommOperationException | IOException e) {
             return CommResult.error;
         }
         return CommResult.ok;

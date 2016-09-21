@@ -1,5 +1,6 @@
 package rastro.controller;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public abstract class RastroCommand implements ICommCommand {
@@ -66,7 +67,7 @@ public abstract class RastroCommand implements ICommCommand {
     }
     
     @Override
-    public boolean receiveData(InputStream is) {
+    public boolean receiveData(InputStream is) throws IOException {
         // TODO Auto-generated method stub
         return true;
     }

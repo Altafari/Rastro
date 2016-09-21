@@ -20,7 +20,7 @@ public class CncSettings {
     private final HashMap<GrblSetting, Float> settingsMap;
     private final GrblSettingParser parser;
     
-    private final class Load implements ICommCommand {
+    private final class LoadCommand implements ICommCommand {
         
         private static final int RESP_BUFF_SIZE = 2048;
         private final byte[] rxBuffer = new byte[RESP_BUFF_SIZE];
@@ -31,25 +31,17 @@ public class CncSettings {
         }
 
         @Override
-        public boolean sendData(OutputStream os) {
-            try {
-                os.write("$$\n".getBytes());
-            } catch (IOException e) {
-                return false;
-            }
+        public boolean sendData(OutputStream os) throws IOException {
+            os.write("$$\n".getBytes());            
             return true;
         }
 
         @Override
-        public boolean receiveData(InputStream is) {
+        public boolean receiveData(InputStream is) throws IOException {
             int bytesRead;
             StringBuilder sb = new StringBuilder();
             while (true) {
-                try {
-                    bytesRead = is.read(rxBuffer);
-                } catch (IOException e) {
-                    return false;
-                }
+                bytesRead = is.read(rxBuffer);
                 if (bytesRead > 0) {                   
                     sb.append(new String(Arrays.copyOfRange(rxBuffer, 0, bytesRead)));
                     if (sb.indexOf("\nok") != -1) {
@@ -116,7 +108,7 @@ public class CncSettings {
     }
     
     public ICommCommand getLoadCommand() {
-        return new Load();
+        return new LoadCommand();
     }
     
     private boolean parseSettings(String settings) {

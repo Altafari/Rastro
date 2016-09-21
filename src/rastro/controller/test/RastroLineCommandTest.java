@@ -34,7 +34,7 @@ public class RastroLineCommandTest {
     }
 
     @Test
-    public void sendStraightLineShouldProvideProperlyPackagedLine() {
+    public void sendStraightLineShouldProvideProperlyPackagedLine() throws IOException {
         final boolean[] line = {true, false, false, true, true, false, false, false, true, true};
         final byte[] straightLine = {'L', 'N', (byte)0x19, (byte)0x03};
         RastroLineCommand rc = new RastroLineCommand(line.length);
@@ -52,7 +52,7 @@ public class RastroLineCommandTest {
     }
 
     @Test
-    public void sendInvertedLineShouldProvideProperlyPackagedLine() {
+    public void sendInvertedLineShouldProvideProperlyPackagedLine() throws IOException {
         final boolean[] line = {true, false, false, true, true, false, false, false, true, true};
         final byte[] invertedLine = {'L', 'N', (byte)0x63, (byte)0x02};
         RastroLineCommand rc = new RastroLineCommand(line.length);
@@ -70,7 +70,7 @@ public class RastroLineCommandTest {
     }
 
     @Test
-    public void sendLineShouldProvideBufferOfCorrectLength() {
+    public void sendLineShouldProvideBufferOfCorrectLength() throws IOException {
         final boolean[] line = new boolean[128];
         RastroLineCommand rc = new RastroLineCommand(line.length);
         rc.packLine(false, line);
@@ -84,7 +84,7 @@ public class RastroLineCommandTest {
     }
    
     @Test
-    public void sendLineShouldProperlyComputeCrc() {
+    public void sendLineShouldProperlyComputeCrc() throws IOException {
         final boolean[] line = {true,  false, false,  false, false, false, true,  false,
                                 false, true,  false,  false, false, false, true,  false,
                                 true,  true,  false,  false, false, false, true,  false };

@@ -47,12 +47,8 @@ public class RastroLineCommand extends RastroCommand {
     }
 
     @Override
-    public boolean sendData(OutputStream os) {
-        try {
-            os.write(txBuffer);
-        } catch (IOException e) {
-            return false;
-        }
+    public boolean sendData(OutputStream os) throws IOException {
+        os.write(txBuffer);        
         return true;
     }
 }

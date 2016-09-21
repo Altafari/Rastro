@@ -38,7 +38,7 @@ public class RastroConfigCommand extends RastroCommand {
     }
     
     @Override
-    public boolean sendData(OutputStream os) {
+    public boolean sendData(OutputStream os) throws IOException {
         putHeader(CFG_HDR);
         int offset = CFG_HDR.length;
         offset = putShort((short) lineLen, offset);
@@ -46,11 +46,7 @@ public class RastroConfigCommand extends RastroCommand {
         offset = putShort((short) expTime, offset);
         txBuffer[offset] = mode;
         computeCRC16(txBuffer);
-        try {
-            os.write(txBuffer);
-        } catch (IOException e) {
-            return false;
-        }
+        os.write(txBuffer);        
         return true;
     }
 }

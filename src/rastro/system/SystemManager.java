@@ -4,6 +4,7 @@ import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
 import rastro.controller.ImageController;
 import rastro.model.CncSettings;
+import rastro.model.GrblStatus;
 import rastro.ui.CncOriginPanel;
 import rastro.ui.CncPositioningPanel;
 import rastro.ui.CommPanel;
@@ -88,6 +89,8 @@ public class SystemManager {
     public void loadGrblSettings() {
         if (grblCommCtrl.sendCommand(cncSettings.getLoadCommand()) == CommResult.ok) {
             cncPosPanel.updateParams(cncSettings.getSettings());
+            GrblStatus gs = new GrblStatus();
+            CommResult result = grblCommCtrl.sendCommand(gs.getReadStatusCommand());
         }
     }
 }
