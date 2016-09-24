@@ -24,27 +24,32 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.event.ChangeListener;
 
 import rastro.model.GrblSettings.GrblSetting;
+import rastro.system.SystemManager;
 
 public class CncPositioningPanel extends BorderedTitledPanel {
 
     /**
      * 
      */
+    public enum CoordName { X, Y };
+    private enum ButtonDir {UP, RIGHT, DOWN, LEFT};
     private static final long serialVersionUID = 1L;
     private static final Dimension CTRL_PAD_SIZE = new Dimension(102, 102);
     private static final Dimension LABEL_SIZE = new Dimension(64, 22);
     private ArrayList<ParamLabel> paramLabelList; 
-    private enum ButtonDir {UP, RIGHT, DOWN, LEFT};
-    public enum CoordName {X, Y};
     private JSlider slider;
+    private float[] sliderMap = { 0.01f, 0.02f, 0.05f, 0.1f, 0.2f, 0.5f, 1.0f, 2.0f, 5.0f, 10.0f };
+    private SystemManager sysMgr;
     
     private ActionListener btnListener = new ActionListener() {
 
         @Override
-        public void actionPerformed(ActionEvent event) {            
-            System.out.println(event.getActionCommand());
+        public void actionPerformed(ActionEvent event) {
+            ArrowButton btn = (ArrowButton)event.getSource();
+            onMoveCommand(btn.getDir());
         }
         
     };
@@ -81,9 +86,11 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         /**
          * 
          */
+        private ButtonDir btDir;
         private static final long serialVersionUID = 1L;
-        ArrowButton(ButtonDir bd) {
+        ArrowButton(ButtonDir bDir) {
             super();
+            btDir = bDir;
             BufferedImage img = null;
             try {
                 img = ImageIO.read(new File("resources/arrow.png"));
@@ -91,11 +98,13 @@ public class CncPositioningPanel extends BorderedTitledPanel {
                 e.printStackTrace();
             }
             AffineTransform tr = new AffineTransform();
-            tr.rotate(bd.ordinal() * (Math.PI / 2.0), img.getWidth() / 2.0, img.getHeight() / 2.0);
+            tr.rotate(btDir.ordinal() * (Math.PI / 2.0), img.getWidth() / 2.0, img.getHeight() / 2.0);
             AffineTransformOp op = new AffineTransformOp(tr, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
             this.setIcon(new ImageIcon(op.filter(img, null)));
-            this.setActionCommand(bd.name());
             this.addActionListener(btnListener);
+        }
+        public ButtonDir getDir() {
+            return btDir;
         }
     }
     
@@ -114,10 +123,16 @@ public class CncPositioningPanel extends BorderedTitledPanel {
                     int keyCode = event.getKeyCode();
                     switch (keyCode) {
                         case KeyEvent.VK_UP:
+                            onMoveCommand(ButtonDir.UP);
+                            break;
                         case KeyEvent.VK_LEFT:
+                            onMoveCommand(ButtonDir.LEFT);
+                            break;
                         case KeyEvent.VK_RIGHT:
+                            onMoveCommand(ButtonDir.RIGHT);
+                            break;
                         case KeyEvent.VK_DOWN:
-                            onKeyPressed(keyCode);
+                            onMoveCommand(ButtonDir.DOWN);
                             break;
                         default:
                     }
@@ -132,8 +147,9 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         }
     }
 
-    public CncPositioningPanel() {
+    public CncPositioningPanel(SystemManager sysManager) {
         super("CNC Positioning");
+        sysMgr = sysManager;
         paramLabelList = new ArrayList<ParamLabel>(8);
         paramLabelList.add(new ParamLabel(CoordName.X, GrblSetting.MAX_TRAVEL_X));
         paramLabelList.add(new ParamLabel(CoordName.Y, GrblSetting.MAX_TRAVEL_Y));
@@ -204,8 +220,22 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         return (int)(RACK_HEIGHT * 2.0f);
     }
     
-    private void onKeyPressed(int keyCode) {
-        System.out.println(keyCode);
+    private void onMoveCommand(ButtonDir dir) {
+        float step = sliderMap[slider.getValue()];        
+        switch (dir) {
+        case UP:
+            sysMgr.getGrblController().joggingMove(0.0f, step);
+            break;
+        case DOWN:
+            sysMgr.getGrblController().joggingMove(0.0f, -step);
+            break;
+        case LEFT:
+            sysMgr.getGrblController().joggingMove(-step, 0.0f);
+            break;
+        case RIGHT:
+            sysMgr.getGrblController().joggingMove(step, 0.0f);
+            break;
+        }
     }
     
     public void updateParams(Map<GrblSetting, Float> settings) {

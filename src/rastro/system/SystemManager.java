@@ -2,6 +2,7 @@ package rastro.system;
 
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
+import rastro.controller.GrblController;
 import rastro.controller.ImageController;
 import rastro.model.GrblSettings;
 import rastro.model.GrblStatusMonitor;
@@ -28,10 +29,16 @@ public class SystemManager {
     private ImageController imgCtrl;
     private ImageControlPanel imgCtrlPanel;
     private GrblStatusMonitor grblStatusMonitor;
+    private GrblController grblController;
         
     private SystemMode sysMode;
     
     private SystemManager() {
+        createSystemObjects();
+        wireUpObservers();
+    }
+    
+    private void createSystemObjects() {
         sysMode = SystemMode.IDLE;
         //mainDlg = new MainDialog();
         grblCommCtrl = new CommController();
@@ -39,12 +46,17 @@ public class SystemManager {
         grblCommPanel = new CommPanel("GRBL", new String[] { "115200", "9600" }, grblCommCtrl);
         rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl);
         cncOrigPanel = new CncOriginPanel();
-        cncPosPanel = new CncPositioningPanel();
+        cncPosPanel = new CncPositioningPanel(this);
         cncSettings = new GrblSettings();
         imgInfoPanel = new ImageInfoPanel();
         imgCtrl = new ImageController(imgInfoPanel);
         imgCtrlPanel = new ImageControlPanel(imgCtrl);
         grblStatusMonitor = new GrblStatusMonitor();
+        grblController = new GrblController(this);
+    }
+    
+    private void wireUpObservers() {
+        
     }
     
     private static synchronized void createNewInstance() {
@@ -84,6 +96,18 @@ public class SystemManager {
         return cncPosPanel;
     }
     
+    public GrblStatusMonitor getGrblStatusMonitor() {
+        return grblStatusMonitor;
+    }
+    
+    public CommController getGrblCommController() {
+        return grblCommCtrl;
+    }
+    
+    public GrblController getGrblController() {
+        return grblController;
+    }
+    
     public synchronized boolean isIdle() {
         return sysMode == SystemMode.IDLE;
     }
@@ -91,7 +115,7 @@ public class SystemManager {
     public void loadGrblSettings() {
         if (grblCommCtrl.sendCommand(cncSettings.getLoadCommand()) == CommResult.ok) {
             cncPosPanel.updateParams(cncSettings.getSettings());            
-            CommResult result = grblCommCtrl.sendCommand(grblStatusMonitor.getReadStatusCommand());
+            //CommResult result = grblCommCtrl.sendCommand(grblStatusMonitor.getReadStatusCommand());
         }
     }
 }

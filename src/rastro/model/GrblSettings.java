@@ -32,7 +32,7 @@ public class GrblSettings {
 
         @Override
         public boolean sendData(OutputStream os) throws IOException {
-            os.write("$$\n".getBytes());            
+            os.write("$$\n".getBytes("US-ASCII"));            
             return true;
         }
 
