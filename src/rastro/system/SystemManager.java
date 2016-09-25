@@ -51,7 +51,7 @@ public class SystemManager {
         imgInfoPanel = new ImageInfoPanel();
         imgCtrl = new ImageController(imgInfoPanel);
         imgCtrlPanel = new ImageControlPanel(imgCtrl);
-        grblStatusMonitor = new GrblStatusMonitor();
+        grblStatusMonitor = new GrblStatusMonitor(this);
         grblController = new GrblController(this);
     }
     

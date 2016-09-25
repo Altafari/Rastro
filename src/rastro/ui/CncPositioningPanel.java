@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.event.ChangeListener;
 
 import rastro.model.GrblSettings.GrblSetting;
 import rastro.system.SystemManager;

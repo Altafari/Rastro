@@ -67,8 +67,9 @@ public class GrblController {
         if (mode != Mode.JOGGING) {
             return;
         } else {
+            sysMgr.getGrblStatusMonitor().startMonitoringTask();
             int pBuffState = sysMgr.getGrblStatusMonitor().getPlannerBufferState();
-            if (pBuffState > 1) {   // TODO: this staff doesn't work now, implement monitor thread
+            if (pBuffState > 1) {
                 return;
             }
             String cmdStr = String.format("G91 G0 X%f Y%f\n", offsetX, offsetY);

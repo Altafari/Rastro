@@ -1,5 +1,7 @@
 package rastro.model;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,19 +11,24 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.Timer;
+
 import rastro.controller.ICommCommand;
+import rastro.system.SystemManager;
 
 public class GrblStatusMonitor {
-    public enum Mode {Idle, Run, Hold, Door, Home, Alarm, Check};
+    public enum Mode { Idle, Run, Hold, Door, Home, Alarm, Check };
     private Mode mode;
+    private SystemManager sysMgr;
     private float[] mPos;
-    private int pBuff;    
+    private int pBuff;
     private Set<IPositionListener> posListeners;
     private Set<IModeListener> modeListeners;
-    private static final Pattern modePattern = Pattern.compile("^([A-Z][a-z]+)");
-    private static final Pattern mPosPattern = 
-            Pattern.compile("MPos:([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+),([0-9]+\\.[0-9]+)");
-    private static final Pattern pBuffPattern = Pattern.compile("Buf:([0-9]+)");
+    private final Pattern modePattern;
+    private final Pattern mPosPattern;
+    private final Pattern pBuffPattern;
+    private Timer monTimer;
+    private static final int UPDATE_INTERVAL_MS = 100;
     
     public interface IPositionListener {
         void onChange(float[] pos);
@@ -127,10 +134,31 @@ public class GrblStatusMonitor {
         }
     }
     
-    public GrblStatusMonitor() {
+    public GrblStatusMonitor(SystemManager sysManager) {
+        sysMgr = sysManager;
         mPos = new float[3];
+        modePattern = Pattern.compile("^([A-Z][a-z]+)");
+        mPosPattern = Pattern.compile("MPos:(-?[0-9]+\\.[0-9]+),([-?0-9]+\\.[0-9]+),(-?[0-9]+\\.[0-9]+)");
+        pBuffPattern = Pattern.compile("Buf:([0-9]+)");
         posListeners = new HashSet<IPositionListener>();
-        modeListeners = new HashSet<IModeListener>();
+        modeListeners = new HashSet<IModeListener>();        
+        monTimer = new Timer(UPDATE_INTERVAL_MS, new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                sysMgr.getGrblCommController().sendCommand(new ReadCommand());
+                if (mode == Mode.Idle) {
+                    monTimer.stop();
+                }
+            }
+            
+        });
+    }
+    
+    public void startMonitoringTask() {
+        if (! monTimer.isRunning()) {
+            monTimer.restart();
+        }
     }
     
     public ICommCommand getReadStatusCommand() {
