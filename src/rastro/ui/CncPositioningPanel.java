@@ -122,16 +122,28 @@ public class CncPositioningPanel extends BorderedTitledPanel {
                     int keyCode = event.getKeyCode();
                     switch (keyCode) {
                         case KeyEvent.VK_UP:
+                        case KeyEvent.VK_KP_UP:
                             onMoveCommand(ButtonDir.UP);
                             break;
                         case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_KP_LEFT:
                             onMoveCommand(ButtonDir.LEFT);
                             break;
                         case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_KP_RIGHT:
                             onMoveCommand(ButtonDir.RIGHT);
                             break;
                         case KeyEvent.VK_DOWN:
+                        case KeyEvent.VK_KP_DOWN:
                             onMoveCommand(ButtonDir.DOWN);
+                            break;
+                        case KeyEvent.VK_PAGE_UP:
+                        case KeyEvent.VK_ADD:
+                            onChangeStep(1);
+                            break;
+                        case KeyEvent.VK_PAGE_DOWN:
+                        case KeyEvent.VK_SUBTRACT:
+                            onChangeStep(-1);
                             break;
                         default:
                     }
@@ -237,6 +249,19 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         }
     }
     
+    private void onChangeStep(int dir) {
+        int currPos = slider.getValue();
+        if (dir > 0) {
+            if (currPos != slider.getMaximum()) {
+                slider.setValue(currPos + 1);
+            }
+        } else {
+            if (currPos != 0) {
+                slider.setValue(currPos - 1);
+            }
+        }
+    }
+
     public void updateParams(Map<GrblSetting, Float> settings) {
         for (ParamLabel p : paramLabelList) {
             p.formatText(settings.get(p.sId));

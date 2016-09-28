@@ -56,7 +56,7 @@ public class SystemManager {
     }
     
     private void wireUpObservers() {
-        
+        grblStatusMonitor.addPosListener(cncOrigPanel.getPositionListener());
     }
     
     private static synchronized void createNewInstance() {

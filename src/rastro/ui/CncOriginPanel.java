@@ -7,6 +7,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import rastro.model.GrblStatusMonitor;
+
 public class CncOriginPanel extends BorderedTitledPanel {
     /**
      * 
@@ -24,6 +26,8 @@ public class CncOriginPanel extends BorderedTitledPanel {
     private float[] position;
     private float[] origin;
     private static final Dimension NUM_FIELD = new Dimension(55, 22);
+    private GrblStatusMonitor.IPositionListener posListener;
+
     public CncOriginPanel() {
         super("CNC origin");
         positionX = new JTextField();
@@ -83,9 +87,16 @@ public class CncOriginPanel extends BorderedTitledPanel {
         this.add(cellOriginY);
         this.add(panelSetOrigin);
         setPosition(new float[] {0.0f, 0.0f});
-        setOrigin();        
+        setOrigin();
+        posListener = new GrblStatusMonitor.IPositionListener() {
+            @Override
+            public void onChange(float[] pos) {
+                positionX.setText(String.format("%4.2f", pos[0]));
+                positionY.setText(String.format("%4.2f", pos[1]));
+            }
+        };
     }
-    
+
     public void setPosition(float[] coord) {
         position = coord.clone();
         positionX.setText(String.format("%4.2f", position[0]));
@@ -102,6 +113,10 @@ public class CncOriginPanel extends BorderedTitledPanel {
         return origin.clone();
     }
     
+    public GrblStatusMonitor.IPositionListener getPositionListener() {
+        return posListener;
+    }
+
     @Override
     protected int getRackHeight() {
         return (int)(RACK_HEIGHT * 1.4f);
