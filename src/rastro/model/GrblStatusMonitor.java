@@ -22,18 +22,14 @@ public class GrblStatusMonitor {
     private SystemManager sysMgr;
     private float[] mPos;
     private int pBuff;
-    private Set<IPositionListener> posListeners;
+    private Set<ICoordListener> posListeners;
     private Set<IModeListener> modeListeners;
     private final Pattern modePattern;
     private final Pattern mPosPattern;
     private final Pattern pBuffPattern;
     private Timer monTimer;
     private static final int UPDATE_INTERVAL_MS = 100;
-    
-    public interface IPositionListener {
-        void onChange(float[] pos);
-    }
-    
+
     public interface IModeListener {
         void onChange(Mode mode);
     }
@@ -92,7 +88,7 @@ public class GrblStatusMonitor {
                 return false;
             }
             if (!Arrays.equals(prevPos, mPos)) {
-                for (IPositionListener l : posListeners) {
+                for (ICoordListener l : posListeners) {
                     l.onChange(mPos.clone());
                 }
             }
@@ -140,7 +136,7 @@ public class GrblStatusMonitor {
         modePattern = Pattern.compile("^([A-Z][a-z]+)");
         mPosPattern = Pattern.compile("MPos:(-?[0-9]+\\.[0-9]+),([-?0-9]+\\.[0-9]+),(-?[0-9]+\\.[0-9]+)");
         pBuffPattern = Pattern.compile("Buf:([0-9]+)");
-        posListeners = new HashSet<IPositionListener>();
+        posListeners = new HashSet<ICoordListener>();
         modeListeners = new HashSet<IModeListener>();        
         monTimer = new Timer(UPDATE_INTERVAL_MS, new ActionListener() {
 
@@ -169,11 +165,11 @@ public class GrblStatusMonitor {
         return pBuff;
     }
     
-    public void addPosListener(IPositionListener l) {
+    public void addPosListener(ICoordListener l) {
         posListeners.add(l);
     }
     
-    public void removePosListener(IPositionListener l) {
+    public void removePosListener(ICoordListener l) {
         posListeners.remove(l);
     }
     
@@ -183,5 +179,9 @@ public class GrblStatusMonitor {
     
     public void removeModeListener(IModeListener l) {
         modeListeners.remove(l);
+    }
+    
+    public float[] getPosition() {
+        return mPos.clone();
     }
 }

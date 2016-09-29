@@ -45,7 +45,7 @@ public class SystemManager {
         rastroCommCtrl = new CommController();        
         grblCommPanel = new CommPanel("GRBL", new String[] { "115200", "9600" }, grblCommCtrl);
         rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl);
-        cncOrigPanel = new CncOriginPanel();
+        cncOrigPanel = new CncOriginPanel(this);
         cncPosPanel = new CncPositioningPanel(this);
         cncSettings = new GrblSettings();
         imgInfoPanel = new ImageInfoPanel();
@@ -57,6 +57,7 @@ public class SystemManager {
     
     private void wireUpObservers() {
         grblStatusMonitor.addPosListener(cncOrigPanel.getPositionListener());
+        grblController.addOriginListener(cncOrigPanel.getOriginListener());
     }
     
     private static synchronized void createNewInstance() {

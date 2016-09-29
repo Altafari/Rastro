@@ -235,16 +235,16 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         float step = sliderMap[slider.getValue()];        
         switch (dir) {
         case UP:
-            sysMgr.getGrblController().joggingMove(0.0f, step);
+            sysMgr.getGrblController().joggingMove(new float[] {0.0f, step}, true);
             break;
         case DOWN:
-            sysMgr.getGrblController().joggingMove(0.0f, -step);
+            sysMgr.getGrblController().joggingMove(new float[] {0.0f, -step}, true);
             break;
         case LEFT:
-            sysMgr.getGrblController().joggingMove(-step, 0.0f);
+            sysMgr.getGrblController().joggingMove(new float[] {-step, 0.0f}, true);
             break;
         case RIGHT:
-            sysMgr.getGrblController().joggingMove(step, 0.0f);
+            sysMgr.getGrblController().joggingMove(new float[] {step, 0.0f}, true);
             break;
         }
     }

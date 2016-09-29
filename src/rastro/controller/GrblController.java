@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-
+import java.util.HashSet;
+import java.util.Set;
+import rastro.model.ICoordListener;
 import rastro.system.SystemManager;
 
 public class GrblController {
@@ -12,6 +14,8 @@ public class GrblController {
     public enum Mode { PROGRAM, JOGGING };
     private Mode mode;
     private SystemManager sysMgr;
+    private float[] origin;
+    private Set<ICoordListener> originListeners;
     
     private class ControlCommand implements ICommCommand {
         
@@ -61,24 +65,61 @@ public class GrblController {
     public GrblController(SystemManager sysManager) {
         sysMgr = sysManager;
         mode = Mode.JOGGING;
+        origin = new float[3];
+        originListeners = new HashSet<ICoordListener>();
     }
     
-    public void joggingMove(float offsetX, float offsetY) {
+    public void joggingMove(float[] pos, boolean relative) {
         if (mode != Mode.JOGGING) {
             return;
         } else {
-            sysMgr.getGrblStatusMonitor().startMonitoringTask();
             int pBuffState = sysMgr.getGrblStatusMonitor().getPlannerBufferState();
             if (pBuffState > 1) {
                 return;
             }
-            String cmdStr = String.format("G91 G0 X%f Y%f\n", offsetX, offsetY);
+            String pref;
+            if (relative) {
+                pref = "G91";
+            } else {
+                pref = "G90";
+            }
+            String cmdStr = String.format("%s G0 X%f Y%f\n", pref, pos[0], pos[1]);
             ICommCommand moveCmd = new ControlCommand(cmdStr);
             sysMgr.getGrblCommController().sendCommand(moveCmd);
+            sysMgr.getGrblStatusMonitor().startMonitoringTask();
+        }
+    }
+
+    public void setOrigin() {
+        if (!isIdleJogging()) {
+            return;
+        }
+        origin = sysMgr.getGrblStatusMonitor().getPosition();
+        for (ICoordListener l : originListeners) {
+            l.onChange(origin);
         }
     }
     
+    public void goOrigin() {
+        if (!isIdleJogging()) {
+            return;
+        }
+        joggingMove(origin, false);
+    }
+
     public void programMove(float offsetX, float offsetY) {
         
+    }
+
+    public void addOriginListener(ICoordListener l) {
+        originListeners.add(l);
+    }
+
+    public void removeOriginListener(ICoordListener l) {
+        originListeners.remove(l);
+    }
+
+    private boolean isIdleJogging() {
+        return mode == Mode.JOGGING && sysMgr.getGrblStatusMonitor().getPlannerBufferState() == 0;
     }
 }

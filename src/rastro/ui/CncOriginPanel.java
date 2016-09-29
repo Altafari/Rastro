@@ -2,34 +2,39 @@ package rastro.ui;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import rastro.model.GrblStatusMonitor;
+import rastro.model.ICoordListener;
+import rastro.system.SystemManager;
 
 public class CncOriginPanel extends BorderedTitledPanel {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    
+
+    private SystemManager sysMgr;
     private JTextField positionX;
     private JTextField positionY;
     private JTextField originX;
     private JTextField originY;
-    private JButton setZero;
     private JButton goZero;
     private JButton setOrigin;
     private JButton goOrigin;
-    private float[] position;
-    private float[] origin;
     private static final Dimension NUM_FIELD = new Dimension(55, 22);
-    private GrblStatusMonitor.IPositionListener posListener;
+    private ICoordListener posListener;
+    private ICoordListener originListener;
+    private ActionListener actionListener;
 
-    public CncOriginPanel() {
+    public CncOriginPanel(SystemManager systemMgr) {
         super("CNC origin");
+        sysMgr = systemMgr;
         positionX = new JTextField();
         positionX.setPreferredSize(NUM_FIELD);
         positionX.setEditable(false);
@@ -42,10 +47,6 @@ public class CncOriginPanel extends BorderedTitledPanel {
         originY = new JTextField();
         originY.setPreferredSize(NUM_FIELD);
         originY.setEditable(false);
-        
-        setZero = new JButton("Set zero");
-        JPanel panelSetZero = new JPanel();
-        panelSetZero.add(setZero);        
         
         goZero = new JButton("Go zero");
         JPanel panelGoZero = new JPanel();
@@ -83,38 +84,55 @@ public class CncOriginPanel extends BorderedTitledPanel {
         this.add(cellOriginX);
         this.add(panelGoOrigin);
         this.add(cellPositionY);
-        this.add(panelSetZero);
+        this.add(Box.createHorizontalGlue());
         this.add(cellOriginY);
         this.add(panelSetOrigin);
-        setPosition(new float[] {0.0f, 0.0f});
-        setOrigin();
-        posListener = new GrblStatusMonitor.IPositionListener() {
+        posListener = new ICoordListener() {
             @Override
             public void onChange(float[] pos) {
                 positionX.setText(String.format("%4.2f", pos[0]));
                 positionY.setText(String.format("%4.2f", pos[1]));
             }
         };
+        originListener = new ICoordListener() {
+            @Override
+            public void onChange(float[] pos) {
+                originX.setText(String.format("%4.2f", pos[0]));
+                originY.setText(String.format("%4.2f", pos[1]));
+            }
+        };
+        actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                String command = event.getActionCommand();
+                switch (command) {
+                case "goZero":
+                    sysMgr.getGrblController().joggingMove(new float[] {0.0f, 0.0f, 0.0f}, false);
+                    break;
+                case "goOrigin":
+                    sysMgr.getGrblController().goOrigin();
+                    break;
+                case "setOrigin":
+                    sysMgr.getGrblController().setOrigin();
+                    break;
+                default:
+                }
+            }
+        };
+        goZero.setActionCommand("goZero");
+        goZero.addActionListener(actionListener);
+        setOrigin.setActionCommand("setOrigin");
+        setOrigin.addActionListener(actionListener);
+        goOrigin.setActionCommand("goOrigin");
+        goOrigin.addActionListener(actionListener);
+    }
+    
+    public ICoordListener getPositionListener() {
+        return posListener;
     }
 
-    public void setPosition(float[] coord) {
-        position = coord.clone();
-        positionX.setText(String.format("%4.2f", position[0]));
-        positionY.setText(String.format("%4.2f", position[1]));
-    }
-    
-    public void setOrigin() {
-        origin = position.clone();
-        originX.setText(String.format("%4.2f", origin[0]));
-        originY.setText(String.format("%4.2f", origin[1]));
-    }
-    
-    public float[] getOrigin() {
-        return origin.clone();
-    }
-    
-    public GrblStatusMonitor.IPositionListener getPositionListener() {
-        return posListener;
+    public ICoordListener getOriginListener() {
+        return originListener;
     }
 
     @Override
