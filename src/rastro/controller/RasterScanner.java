@@ -4,8 +4,8 @@ import java.util.Iterator;
 
 public class RasterScanner implements Iterable<boolean[]> {
 
-    private int spmX;
-    private int spmY;
+    private float spmX;
+    private float spmY;
     private int width;
     private int height;
     private int nLine;
@@ -16,13 +16,13 @@ public class RasterScanner implements Iterable<boolean[]> {
     private int lnStep;
     private ImageController imCon;
 
-    public RasterScanner(int stepPermmX, int stepPermmY, int sizeXmm, int sizeYmm,
-            boolean[][] scannerShape, int lineStep) {
+    public RasterScanner(float stepPermmX, float stepPermmY, float sizeXmm, float sizeYmm,
+            boolean[][] scShape, int lineStep) {
         spmX = stepPermmX;
         spmY = stepPermmY;
-        width = sizeXmm * spmX;
-        height = sizeYmm * spmY;
-        shape = scannerShape;
+        width = (int)Math.round(sizeXmm * spmX);
+        height = (int)Math.round(sizeYmm * spmY);
+        shape = scShape;
         vPadding = (shape.length - 1) / 2; // both scannerShape dimensions must be odd
         hPadding = (shape[0].length - 1) / 2;
         lnStep = lineStep;
