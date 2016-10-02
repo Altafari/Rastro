@@ -4,6 +4,7 @@ import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
 import rastro.controller.GrblController;
 import rastro.controller.ImageController;
+import rastro.controller.ProgramController;
 import rastro.model.GrblSettings;
 import rastro.model.GrblStatusMonitor;
 import rastro.ui.CncOriginPanel;
@@ -24,14 +25,15 @@ public class SystemManager {
     private CommPanel rastroCommPanel;
     private CncOriginPanel cncOrigPanel;
     private CncPositioningPanel cncPosPanel;
-    private GrblSettings cncSettings;
+    private GrblSettings grblSettings;
     private ImageInfoPanel imgInfoPanel;
     private ImageController imgCtrl;
     private ImageControlPanel imgCtrlPanel;
     private GrblStatusMonitor grblStatusMonitor;
     private GrblController grblController;
+    private ProgramController progCtrl;
         
-    private SystemMode sysMode;
+    //private SystemMode sysMode;
     
     private SystemManager() {
         createSystemObjects();
@@ -39,7 +41,7 @@ public class SystemManager {
     }
     
     private void createSystemObjects() {
-        sysMode = SystemMode.IDLE;
+   //     sysMode = SystemMode.IDLE;
         //mainDlg = new MainDialog();
         grblCommCtrl = new CommController();
         rastroCommCtrl = new CommController();        
@@ -47,12 +49,13 @@ public class SystemManager {
         rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl);
         cncOrigPanel = new CncOriginPanel(this);
         cncPosPanel = new CncPositioningPanel(this);
-        cncSettings = new GrblSettings();
+        grblSettings = new GrblSettings();
         imgInfoPanel = new ImageInfoPanel();
         imgCtrl = new ImageController(imgInfoPanel);
         imgCtrlPanel = new ImageControlPanel(imgCtrl);
         grblStatusMonitor = new GrblStatusMonitor(this);
         grblController = new GrblController(this);
+        progCtrl = new ProgramController(this);
     }
     
     private void wireUpObservers() {
@@ -109,13 +112,29 @@ public class SystemManager {
         return grblController;
     }
     
-    public synchronized boolean isIdle() {
-        return sysMode == SystemMode.IDLE;
+    public GrblSettings getGrblSettings() {
+        return grblSettings;
     }
     
+    public ImageController getImageController() {
+        return imgCtrl;
+    }
+    
+    public CommController getRastroCommController() {
+        return rastroCommCtrl;
+    }
+    
+    public ProgramController getProgramController() {
+        return progCtrl;
+    }
+    
+    /*public synchronized boolean isIdle() {
+        return sysMode == SystemMode.IDLE;
+    }*/
+    
     public void loadGrblSettings() {
-        if (grblCommCtrl.sendCommand(cncSettings.getLoadCommand()) == CommResult.ok) {
-            cncPosPanel.updateParams(cncSettings.getSettings());            
+        if (grblCommCtrl.sendCommand(grblSettings.getLoadCommand()) == CommResult.ok) {
+            cncPosPanel.updateParams(grblSettings.getSettings());            
             //CommResult result = grblCommCtrl.sendCommand(grblStatusMonitor.getReadStatusCommand());
         }
     }

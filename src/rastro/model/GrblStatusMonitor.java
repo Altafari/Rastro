@@ -72,8 +72,6 @@ public class GrblStatusMonitor {
         }
         
         private boolean parseString(String s) {
-            float[] prevPos = mPos.clone();
-            Mode prevMode = mode;
             try {
                 if (!parseMode(s)) {
                     return false;
@@ -87,15 +85,11 @@ public class GrblStatusMonitor {
             } catch (IllegalArgumentException e) {
                 return false;
             }
-            if (!Arrays.equals(prevPos, mPos)) {
-                for (ICoordListener l : posListeners) {
-                    l.onChange(mPos.clone());
-                }
+            for (ICoordListener l : posListeners) {
+                l.onChange(mPos.clone());
             }
-            if (prevMode != mode) {
-                for (IModeListener l : modeListeners) {
-                    l.onChange(mode);
-                }
+            for (IModeListener l : modeListeners) {
+                l.onChange(mode);
             }
             return true;
         }
@@ -139,7 +133,6 @@ public class GrblStatusMonitor {
         posListeners = new HashSet<ICoordListener>();
         modeListeners = new HashSet<IModeListener>();        
         monTimer = new Timer(UPDATE_INTERVAL_MS, new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 sysMgr.getGrblCommController().sendCommand(new ReadCommand());
@@ -183,5 +176,9 @@ public class GrblStatusMonitor {
     
     public float[] getPosition() {
         return mPos.clone();
+    }
+    
+    public Mode getMode() {
+        return mode;
     }
 }

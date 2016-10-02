@@ -107,8 +107,20 @@ public class GrblController {
         joggingMove(origin, false);
     }
 
-    public void programMove(float offsetX, float offsetY) {
-        
+    public void programMove(float[] pos, boolean relative) {
+        if (mode != Mode.PROGRAM) {
+            return;
+        } else {
+            String pref;
+            if (relative) {
+                pref = "G91";
+            } else {
+                pref = "G90";
+            }
+            String cmdStr = String.format("%s G0 X%f Y%f\n", pref, pos[0], pos[1]);
+            ICommCommand moveCmd = new ControlCommand(cmdStr);
+            sysMgr.getGrblCommController().sendCommand(moveCmd);
+        }
     }
 
     public void addOriginListener(ICoordListener l) {
@@ -117,6 +129,10 @@ public class GrblController {
 
     public void removeOriginListener(ICoordListener l) {
         originListeners.remove(l);
+    }
+    
+    public void setMode(Mode m) {
+        mode = m;
     }
 
     private boolean isIdleJogging() {

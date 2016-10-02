@@ -101,7 +101,7 @@ public class CommController {
         baudRate = rate;
     }
 
-    public CommResult sendCommand(ICommCommand cmd) {
+    public synchronized CommResult sendCommand(ICommCommand cmd) {
         try {
             sPort.enableReceiveTimeout(cmd.getTimeout());
             if (!cmd.sendData(out)) {

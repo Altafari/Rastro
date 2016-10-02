@@ -21,6 +21,7 @@ public class ImageController {
     private int height;
 
     public ImageController(ImageInfoPanel imageInfoPanel) {
+        img = null;
         infoPanel = imageInfoPanel;
     }
 
@@ -59,6 +60,10 @@ public class ImageController {
         }
         int color = img.getRGB(x, y) & 0x00FFFFFF;
         return color == 0;
+    }
+    
+    public boolean isLoaded() {
+        return img != null;
     }
     
     private boolean isValidCoord(int x, int y) {

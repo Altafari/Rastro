@@ -27,6 +27,7 @@ public class CncOriginPanel extends BorderedTitledPanel {
     private JButton goZero;
     private JButton setOrigin;
     private JButton goOrigin;
+    private JButton runProgram;
     private static final Dimension NUM_FIELD = new Dimension(55, 22);
     private ICoordListener posListener;
     private ICoordListener originListener;
@@ -60,6 +61,10 @@ public class CncOriginPanel extends BorderedTitledPanel {
         JPanel panelGoOrigin = new JPanel();
         panelGoOrigin.add(goOrigin);
         
+        runProgram = new JButton("Run program");
+        JPanel panelRunProg = new JPanel();
+        panelRunProg.add(runProgram);
+        
         JPanel cellOriginX = new JPanel();
         cellOriginX.add(new JLabel("Orig X="));
         cellOriginX.add(originX);
@@ -84,7 +89,8 @@ public class CncOriginPanel extends BorderedTitledPanel {
         this.add(cellOriginX);
         this.add(panelGoOrigin);
         this.add(cellPositionY);
-        this.add(Box.createHorizontalGlue());
+        this.add(panelRunProg);
+        //this.add(Box.createHorizontalGlue());
         this.add(cellOriginY);
         this.add(panelSetOrigin);
         posListener = new ICoordListener() {
@@ -115,6 +121,9 @@ public class CncOriginPanel extends BorderedTitledPanel {
                 case "setOrigin":
                     sysMgr.getGrblController().setOrigin();
                     break;
+                case "runProgram":
+                    sysMgr.getProgramController().startProgram();
+                    break;
                 default:
                 }
             }
@@ -125,6 +134,8 @@ public class CncOriginPanel extends BorderedTitledPanel {
         setOrigin.addActionListener(actionListener);
         goOrigin.setActionCommand("goOrigin");
         goOrigin.addActionListener(actionListener);
+        runProgram.setActionCommand("runProgram");
+        runProgram.addActionListener(actionListener);
     }
     
     public ICoordListener getPositionListener() {
