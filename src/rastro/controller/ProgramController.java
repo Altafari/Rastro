@@ -16,6 +16,7 @@ public class ProgramController {
     private Runnable prog;
     private float overrun;
     private float beamR;
+    private Thread progThread;
     
     public ProgramController(SystemManager sysManager) {
         mode = Mode.IDLE;
@@ -85,7 +86,8 @@ public class ProgramController {
                 grblCtrl.setMode(GrblController.Mode.JOGGING);                
             }
         };
-        (new Thread(prog)).start();
+        progThread = new Thread(prog);
+        progThread.start();
     }
     
     public void stopProgram() {

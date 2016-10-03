@@ -25,6 +25,7 @@ public class MainDialog {
         ctrlPanel.add(sysMgr.getImageInfoPanel());
         ctrlPanel.add(sysMgr.getCncOriginPanel());
         ctrlPanel.add(sysMgr.getCncPositioningPanel());
+        ctrlPanel.add(sysMgr.getProgramControlPanel());
         ctrlPanel.add(Box.createVerticalGlue());
         pane.add(ctrlPanel, BorderLayout.LINE_START);        
         pane.add(new JPanel(), BorderLayout.LINE_END);
