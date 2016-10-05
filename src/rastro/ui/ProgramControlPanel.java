@@ -5,15 +5,24 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.NumberFormat;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import rastro.model.GrblSettings;
+import rastro.system.SystemManager;
 
 public class ProgramControlPanel extends BorderedTitledPanel {
 
@@ -23,6 +32,7 @@ public class ProgramControlPanel extends BorderedTitledPanel {
     
     private static final long serialVersionUID = 1L;
     
+    private SystemManager sysMgr;
     private JButton startBtn;
     private JButton stopBtn;
     private JButton pauseBtn;
@@ -30,8 +40,10 @@ public class ProgramControlPanel extends BorderedTitledPanel {
     private final float[] radValues = {0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f};
     private JSlider lineStep;
     private final int[] stepValues = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    private JTextField overScan;
-    private JTextField expTime;
+    private JFormattedTextField overScan;
+    private JFormattedTextField expTime;
+    private JLabel lineStepDim;
+    private JLabel lineBoundary;
     private final Dimension DIM_TEXTFIELD = new Dimension(50, 22);
     private final Dimension DIM_BUTTON = new Dimension(80, 22);
     
@@ -50,8 +62,30 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         }  
     };
     
-    public ProgramControlPanel() {
+    private final ChangeListener changeListener = new ChangeListener() {
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            onChange();
+        }
+    };
+
+    private final PropertyChangeListener propChangeListener = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            Object src = evt.getSource();
+            if (src == overScan) {
+                sysMgr.getProgramController().setOverScan(((Number) overScan.getValue()).floatValue());
+                onChange();
+            } else if (src == expTime) {
+                sysMgr.getProgramController().setExpTime(((Number) expTime.getValue()).floatValue());
+            }
+            onChange();
+        }        
+    };
+
+    public ProgramControlPanel(SystemManager sysManager) {
         super("Program control");
+        sysMgr = sysManager;
         startBtn = new JButton("Start");
         startBtn.setActionCommand("start");
         startBtn.addActionListener(actionListener);
@@ -78,6 +112,7 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         radLabels.put(8, new JLabel("0.09"));
         beamRad.setLabelTable(radLabels);
         beamRad.setAlignmentX(CENTER_ALIGNMENT);
+        beamRad.addChangeListener(changeListener);
         JLabel radSliderLabel = new JLabel("Beam radius");
         radSliderLabel.setAlignmentX(CENTER_ALIGNMENT);
         radSliderPanel.add(radSliderLabel);
@@ -97,6 +132,7 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         stepLabels.put(8, new JLabel("9"));
         lineStep.setLabelTable(stepLabels);
         lineStep.setAlignmentX(CENTER_ALIGNMENT);
+        lineStep.addChangeListener(changeListener);
         JLabel stepSliderLabel = new JLabel("Line step");
         stepSliderLabel.setAlignmentX(CENTER_ALIGNMENT);
         stepSliderPanel.add(stepSliderLabel);
@@ -115,13 +151,27 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         JPanel textFieldPanel = new JPanel();        
         textFieldPanel.setLayout(new GridLayout(4, 1));        
         
-        textFieldPanel.add(Box.createVerticalGlue());
-        textFieldPanel.add(Box.createVerticalGlue());
         
-        overScan = new JTextField();
+        lineStepDim = new JLabel();
+        JPanel lineStepDimPanel = new JPanel();
+        lineStepDimPanel.setAlignmentX(CENTER_ALIGNMENT);
+        lineStepDimPanel.add(lineStepDim);
+        
+        lineBoundary = new JLabel();
+        JPanel lineBoundaryPanel = new JPanel();
+        lineBoundaryPanel.setAlignmentX(CENTER_ALIGNMENT);
+        lineBoundaryPanel.add(lineBoundary);
+        
+        textFieldPanel.add(lineStepDimPanel);
+        textFieldPanel.add(lineBoundaryPanel);        
+        overScan = new JFormattedTextField(NumberFormat.getNumberInstance());
         overScan.setPreferredSize(DIM_TEXTFIELD);
-        expTime = new JTextField();
-        expTime.setPreferredSize(DIM_TEXTFIELD);        
+        overScan.setValue(new Float(0.0f));
+        overScan.addPropertyChangeListener(propChangeListener);
+        expTime = new JFormattedTextField(NumberFormat.getNumberInstance());
+        expTime.setPreferredSize(DIM_TEXTFIELD);
+        expTime.setValue(new Float(0.0f));
+        expTime.addPropertyChangeListener(propChangeListener);
         
         JPanel overScanPanel = new JPanel();
         overScanPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
@@ -142,6 +192,34 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         this.add(Box.createHorizontalGlue());
         this.add(buttonPanel);
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
+    }
+    
+    public float getBeamRadius() {
+        return radValues[beamRad.getValue()];
+    }
+    
+    public int getLineStep() {
+        return stepValues[lineStep.getValue()];
+    }
+    
+    private void onChange() {
+        
+        float spmY = Float.POSITIVE_INFINITY;
+        Map<GrblSettings.GrblSetting, Float> settings= sysMgr.getGrblSettings().getSettings();
+        GrblSettings.GrblSetting key = GrblSettings.GrblSetting.STEP_PER_MM_Y;
+        if (settings.containsKey(key)) {
+            spmY = settings.get(key);
+        }        
+        updateLineDim(getLineStep() / spmY);
+        updateLineBoundary(sysMgr.getProgramController().getLineSpan());
+    }
+    
+    private void updateLineDim(float dim) {
+        lineStepDim.setText(String.format("Scan step: %1.3f mm", dim));
+    }
+    
+    private void updateLineBoundary(float[] span) {
+        lineBoundary.setText(String.format("Span: %3.1f~%3.1f mm", span[0], span[1]));
     }
     
     protected int getRackHeight() {

@@ -66,6 +66,10 @@ public class ImageController {
         return img != null;
     }
     
+    public float[] getDimensions() {
+        return new float[] {width * pixelSize, height * pixelSize};
+    }
+    
     private boolean isValidCoord(int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
     }

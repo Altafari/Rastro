@@ -3,6 +3,7 @@ package rastro.controller;
 import java.util.Map;
 
 import rastro.model.GrblSettings.GrblSetting;
+import rastro.model.GrblSettings;
 import rastro.model.GrblStatusMonitor;
 import rastro.model.GrblStatusMonitor.IModeListener;
 import rastro.system.SystemManager;
@@ -14,13 +15,16 @@ public class ProgramController {
     private Mode mode;
     private SystemManager sysMgr;
     private Runnable prog;
-    private float overrun;
+    private float overScan;
+    private float expTime;
     private float beamR;
+    private float[] lineSpan;
     private Thread progThread;
     
     public ProgramController(SystemManager sysManager) {
         mode = Mode.IDLE;
         sysMgr = sysManager;
+        lineSpan = new float[2];
     }
     
     public synchronized void startProgram() {
@@ -96,6 +100,29 @@ public class ProgramController {
     
     public void pauseProgram() {
         
+    }
+    
+    public void setOverScan(float val) {
+        overScan = val;
+        float[] origin = sysMgr.getGrblController().getOrigin();
+        float[] imgDim = sysMgr.getImageController().getDimensions();
+        float maxTravelX = 0.0f;
+        Map<GrblSettings.GrblSetting, Float> settings = sysMgr.getGrblSettings().getSettings();
+        GrblSettings.GrblSetting key = GrblSettings.GrblSetting.MAX_TRAVEL_X;
+        if (settings.containsKey(key)) {
+            maxTravelX = settings.get(key);
+        }
+        lineSpan[0] = Math.max(0.0f, origin[0] - overScan);
+        lineSpan[1] = Math.min(maxTravelX, imgDim[0] + origin[0] + overScan);
+        // TODO convert to listener
+    }
+    
+    public float[] getLineSpan() {
+        return lineSpan.clone();
+    }
+    
+    public void setExpTime(float val) {
+        expTime = val;
     }
     
     private float computeMoveCompletionTime(float dist, float feedRate, float accRate) {

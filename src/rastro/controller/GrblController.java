@@ -134,6 +134,10 @@ public class GrblController {
     public void setMode(Mode m) {
         mode = m;
     }
+    
+    public float[] getOrigin() {
+        return origin.clone();
+    }
 
     private boolean isIdleJogging() {
         return mode == Mode.JOGGING && sysMgr.getGrblStatusMonitor().getPlannerBufferState() == 0;
