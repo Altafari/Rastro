@@ -31,18 +31,18 @@ public class ProgramController {
         }            
         mode = Mode.RUN;
         Map<GrblSetting, Float> settings = sysMgr.getGrblSettings().getSettings();
-        float spmX = settings.get(GrblSetting.STEP_PER_MM_X);
-        float spmY = settings.get(GrblSetting.STEP_PER_MM_Y);
+        final float[] orig = sysMgr.getGrblController().getOrigin();
+        float[] imDim = sysMgr.getImageController().getDimensions();
+        final float spmY = settings.get(GrblSetting.STEP_PER_MM_Y);
+        final float[] line = getLineSpan();
+        final float lineStep = sysMgr.getProgramControlPanel().getLineStep() / spmY;
+        final float maxY = orig[1] + imDim[1];
         // pull settings - scanning shape radius
-        // pull settings - working area size -> image size
         prog = new Runnable() {
             GrblStatusMonitor.Mode grblMode;
             LineDir lDir = LineDir.FORWARD;
             @Override
             public void run() {
-                float lineLen = 100.0f; // TODO: Stub
-                float lineStep = 1.0f;
-                int lCount = 0;
                 GrblController grblCtrl = sysMgr.getGrblController();
                 CommController rastroCtrl = sysMgr.getRastroCommController();
                 grblCtrl.setMode(GrblController.Mode.PROGRAM);
@@ -58,7 +58,9 @@ public class ProgramController {
                     }
                 };
                 sysMgr.getGrblStatusMonitor().addModeListener(modeListener);
-                sysMgr.getGrblStatusMonitor().startMonitoringTask();  
+                sysMgr.getGrblStatusMonitor().startMonitoringTask();
+                float currentY = orig[1];
+                grblCtrl.programMove(new float[] {line[0], currentY}, false);
                 while (mode == Mode.RUN) {
                     synchronized (this) {
                     if (grblMode != GrblStatusMonitor.Mode.Idle) {
@@ -70,15 +72,18 @@ public class ProgramController {
                         }
                     }                    
                     if (lDir == LineDir.FORWARD) {                        
-                        grblCtrl.programMove(new float[] {lineLen, 0.0f}, true);
+                        grblCtrl.programMove(new float[] {line[1], currentY}, false);
                         lDir = LineDir.BACK;
                     } else {                        
-                        grblCtrl.programMove(new float[] {-lineLen, 0.0f}, true);
+                        grblCtrl.programMove(new float[] {line[0], currentY}, false);
                         lDir = LineDir.FORWARD;
                     }
-                    grblCtrl.programMove(new float[] {0.0f, lineStep}, true);
-                    if (++lCount > 10) {
+                    currentY += lineStep;
+                    if (currentY > maxY) {
+                        grblCtrl.programMove(orig, false);
                         mode = Mode.IDLE;
+                    } else {
+                        grblCtrl.programMove(new float[] {0.0f, lineStep}, true);
                     }
                     //TODO: add delay
                     grblMode = null;

@@ -51,15 +51,16 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
-         /*   switch (event.getActionCommand()) {
+            switch (event.getActionCommand()) {
             case "start":
+                sysMgr.getProgramController().startProgram();
                 break;
             case "stop":
                 break;
             case "pause":
                 break;
             default:
-            }*/
+            }
         }  
     };
     
