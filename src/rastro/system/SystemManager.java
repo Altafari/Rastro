@@ -1,5 +1,8 @@
 package rastro.system;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
 import rastro.controller.GrblController;
@@ -19,6 +22,7 @@ public class SystemManager {
     public enum SystemMode {IDLE, RUNNING};    
     private static SystemManager sysMgr;
     
+    private Set<IStateListener> stateListeners;
     //private MainDialog mainDlg;
     private CommController grblCommCtrl;
     private CommController rastroCommCtrl;
@@ -38,8 +42,11 @@ public class SystemManager {
     //private SystemMode sysMode;
     
     private SystemManager() {
+        stateListeners = new HashSet<IStateListener>();
         createSystemObjects();
         wireUpObservers();
+        addStateListeners();
+        stateListeners.add(progCtrlPanel);
     }
     
     private void createSystemObjects() {
@@ -52,9 +59,9 @@ public class SystemManager {
         cncOrigPanel = new CncOriginPanel(this);
         cncPosPanel = new CncPositioningPanel(this);
         grblSettings = new GrblSettings();
-        imgInfoPanel = new ImageInfoPanel();
-        imgCtrl = new ImageController(imgInfoPanel);
-        imgCtrlPanel = new ImageControlPanel(imgCtrl);
+        imgInfoPanel = new ImageInfoPanel(this);
+        imgCtrl = new ImageController();
+        imgCtrlPanel = new ImageControlPanel(this);
         progCtrlPanel = new ProgramControlPanel(this);
         grblStatusMonitor = new GrblStatusMonitor(this);
         grblController = new GrblController(this);
@@ -64,6 +71,11 @@ public class SystemManager {
     private void wireUpObservers() {
         grblStatusMonitor.addPosListener(cncOrigPanel.getPositionListener());
         grblController.addOriginListener(cncOrigPanel.getOriginListener());
+    }
+    
+    private void addStateListeners() {
+        stateListeners.add(progCtrlPanel);
+        stateListeners.add(imgInfoPanel);
     }
     
     private static synchronized void createNewInstance() {
@@ -139,10 +151,17 @@ public class SystemManager {
         return sysMode == SystemMode.IDLE;
     }*/
     
-    public void loadGrblSettings() {
+    public void notifyStateChanged() {
+        for (IStateListener l : stateListeners) {
+            l.stateChanged();
+        }
+    }
+    
+    public boolean loadGrblSettings() {
         if (grblCommCtrl.sendCommand(grblSettings.getLoadCommand()) == CommResult.ok) {
             cncPosPanel.updateParams(grblSettings.getSettings());            
-            //CommResult result = grblCommCtrl.sendCommand(grblStatusMonitor.getReadStatusCommand());
+            return true;
         }
+        return false;
     }
 }

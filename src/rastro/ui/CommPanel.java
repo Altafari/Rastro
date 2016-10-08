@@ -75,7 +75,7 @@ public class CommPanel extends BorderedTitledPanel {
                 cCon.setPortName((String) comPortName.getSelectedItem());
                 cCon.setBaudRate(Integer.parseInt((String) baudRate.getSelectedItem()));
                 if (cCon.openPort() == CommResult.ok) {
-                    linkStatus.setText("Status: ok");
+                    linkStatus.setText("OK");
                 } else {
                     linkStatus.setText("Error");
                 }
@@ -83,7 +83,11 @@ public class CommPanel extends BorderedTitledPanel {
                 case "test":
                 (new Thread(new Runnable() {
                     public void run() {
-                        SystemManager.getInstance().loadGrblSettings();
+                        if (SystemManager.getInstance().loadGrblSettings()) {
+                            linkStatus.setText("Pass");
+                        } else {
+                            linkStatus.setText("Fail");
+                        }
                     }
                 })).start();
                 break;

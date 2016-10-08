@@ -15,15 +15,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
-import rastro.controller.ImageController;
 import rastro.controller.ImageController.RasterResult;
+import rastro.system.SystemManager;
 
 public class ImageControlPanel extends BorderedTitledPanel {
     private static final long serialVersionUID = 1L;
+    private SystemManager sysMgr;
     private JTextField fileName;
     private JButton btnBrowse;
     private JTextField imageDpi;
-    private ImageController imCon;
     private JFileChooser fc;
     private int dpi = 900;
     private static final int MIN_DPI = 75;
@@ -41,7 +41,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
                 case "browse":       
                     if (fc.showOpenDialog(ImageControlPanel.this) == JFileChooser.APPROVE_OPTION);
                     File imgFile = fc.getSelectedFile();
-                    if (imCon.loadImage(imgFile) == RasterResult.ok) {
+                    if (sysMgr.getImageController().loadImage(imgFile) == RasterResult.ok) {
                         fileName.setText(imgFile.getName());
                     } else {
                         fileName.setText("");
@@ -50,6 +50,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
                                 "Can't load image file: " + imgFile.getName(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
+                    sysMgr.notifyStateChanged();
                 break;
                 case "dpi":
                     onDpiChange();                  
@@ -59,8 +60,9 @@ public class ImageControlPanel extends BorderedTitledPanel {
         }       
     };    
     
-    public ImageControlPanel(ImageController imgController) {
+    public ImageControlPanel(SystemManager sysManager) {
         super("Input image");
+        sysMgr = sysManager;
         fc = new JFileChooser();
         fc.setFileFilter(new FileFilter() {
 
@@ -85,7 +87,6 @@ public class ImageControlPanel extends BorderedTitledPanel {
         });
         fc.setMultiSelectionEnabled(false);
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        imCon = imgController;        
         fileName = new JTextField();
         fileName.setMaximumSize(DIM_FILE_FIELD);
         fileName.setEditable(false);
@@ -132,6 +133,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
             dpi = val;
         }
         imageDpi.setText(Integer.toString(dpi));
-        imCon.setDpi(dpi);
+        sysMgr.getImageController().setDpi(dpi);
+        sysMgr.notifyStateChanged();
     }
 }

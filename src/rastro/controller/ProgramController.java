@@ -18,13 +18,11 @@ public class ProgramController {
     private float overScan;
     private float expTime;
     private float beamR;
-    private float[] lineSpan;
     private Thread progThread;
     
     public ProgramController(SystemManager sysManager) {
         mode = Mode.IDLE;
         sysMgr = sysManager;
-        lineSpan = new float[2];
     }
     
     public synchronized void startProgram() {
@@ -104,6 +102,9 @@ public class ProgramController {
     
     public void setOverScan(float val) {
         overScan = val;
+    }
+    
+    public float[] getLineSpan() {
         float[] origin = sysMgr.getGrblController().getOrigin();
         float[] imgDim = sysMgr.getImageController().getDimensions();
         float maxTravelX = 0.0f;
@@ -112,13 +113,10 @@ public class ProgramController {
         if (settings.containsKey(key)) {
             maxTravelX = settings.get(key);
         }
+        float[] lineSpan = new float[2];
         lineSpan[0] = Math.max(0.0f, origin[0] - overScan);
         lineSpan[1] = Math.min(maxTravelX, imgDim[0] + origin[0] + overScan);
-        // TODO convert to listener
-    }
-    
-    public float[] getLineSpan() {
-        return lineSpan.clone();
+        return lineSpan;
     }
     
     public void setExpTime(float val) {

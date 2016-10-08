@@ -117,6 +117,7 @@ public class CncOriginPanel extends BorderedTitledPanel {
                     break;
                 default:
                 }
+                sysMgr.notifyStateChanged();
             }
         };
         goZero.setActionCommand("goZero");

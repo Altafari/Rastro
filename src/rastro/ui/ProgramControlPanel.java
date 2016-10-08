@@ -22,9 +22,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import rastro.model.GrblSettings;
+import rastro.system.IStateListener;
 import rastro.system.SystemManager;
 
-public class ProgramControlPanel extends BorderedTitledPanel {
+public class ProgramControlPanel extends BorderedTitledPanel implements IStateListener {
 
     /**
      * 
@@ -65,7 +66,7 @@ public class ProgramControlPanel extends BorderedTitledPanel {
     private final ChangeListener changeListener = new ChangeListener() {
         @Override
         public void stateChanged(ChangeEvent e) {
-            onChange();
+            sysMgr.notifyStateChanged();
         }
     };
 
@@ -75,11 +76,10 @@ public class ProgramControlPanel extends BorderedTitledPanel {
             Object src = evt.getSource();
             if (src == overScan) {
                 sysMgr.getProgramController().setOverScan(((Number) overScan.getValue()).floatValue());
-                onChange();
             } else if (src == expTime) {
                 sysMgr.getProgramController().setExpTime(((Number) expTime.getValue()).floatValue());
             }
-            onChange();
+            sysMgr.notifyStateChanged();
         }        
     };
 
@@ -201,19 +201,7 @@ public class ProgramControlPanel extends BorderedTitledPanel {
     public int getLineStep() {
         return stepValues[lineStep.getValue()];
     }
-    
-    private void onChange() {
-        
-        float spmY = Float.POSITIVE_INFINITY;
-        Map<GrblSettings.GrblSetting, Float> settings= sysMgr.getGrblSettings().getSettings();
-        GrblSettings.GrblSetting key = GrblSettings.GrblSetting.STEP_PER_MM_Y;
-        if (settings.containsKey(key)) {
-            spmY = settings.get(key);
-        }        
-        updateLineDim(getLineStep() / spmY);
-        updateLineBoundary(sysMgr.getProgramController().getLineSpan());
-    }
-    
+
     private void updateLineDim(float dim) {
         lineStepDim.setText(String.format("Scan step: %1.3f mm", dim));
     }
@@ -226,4 +214,15 @@ public class ProgramControlPanel extends BorderedTitledPanel {
         return RACK_HEIGHT * 2;
     }
 
+    @Override
+    public void stateChanged() {
+        float spmY = Float.POSITIVE_INFINITY;
+        Map<GrblSettings.GrblSetting, Float> settings= sysMgr.getGrblSettings().getSettings();
+        GrblSettings.GrblSetting key = GrblSettings.GrblSetting.STEP_PER_MM_Y;
+        if (settings.containsKey(key)) {
+            spmY = settings.get(key);
+        }
+        updateLineDim(getLineStep() / spmY);
+        updateLineBoundary(sysMgr.getProgramController().getLineSpan());
+    }
 }
