@@ -26,9 +26,10 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 
 import rastro.model.GrblSettings.GrblSetting;
+import rastro.system.IStateListener;
 import rastro.system.SystemManager;
 
-public class CncPositioningPanel extends BorderedTitledPanel {
+public class CncPositioningPanel extends BorderedTitledPanel implements IStateListener {
 
     /**
      * 
@@ -67,7 +68,7 @@ public class CncPositioningPanel extends BorderedTitledPanel {
             coordName = cn;
             sId = settingId;
             this.setPreferredSize(LABEL_SIZE);
-            formatText(300.0f);
+            this.formatText(null);
         }
 
         private void formatText(Float val) {
@@ -75,7 +76,7 @@ public class CncPositioningPanel extends BorderedTitledPanel {
             if (val != null) {
                 strVal = String.format("%4.2f", val);
             } else {
-                strVal = "";
+                strVal = "n/a";
             }
             this.setText(String.format("%s: %s", coordName.name(), strVal));
         }
@@ -262,7 +263,9 @@ public class CncPositioningPanel extends BorderedTitledPanel {
         }
     }
 
-    public void updateParams(Map<GrblSetting, Float> settings) {
+    @Override
+    public void stateChanged() {
+        Map<GrblSetting, Float> settings = sysMgr.getGrblSettings().getSettings();
         for (ParamLabel p : paramLabelList) {
             p.formatText(settings.get(p.sId));
         }

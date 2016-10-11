@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -85,12 +84,7 @@ public class GrblStatusMonitor {
             } catch (IllegalArgumentException e) {
                 return false;
             }
-            for (ICoordListener l : posListeners) {
-                l.onChange(mPos.clone());
-            }
-            for (IModeListener l : modeListeners) {
-                l.onChange(mode);
-            }
+            notifyListeners();
             return true;
         }
         
@@ -180,5 +174,18 @@ public class GrblStatusMonitor {
     
     public Mode getMode() {
         return mode;
+    }
+    
+    public void forceNotification() {
+        notifyListeners();
+    }
+    
+    private void notifyListeners() {
+        for (ICoordListener l : posListeners) {
+            l.onChange(mPos.clone());
+        }
+        for (IModeListener l : modeListeners) {
+            l.onChange(mode);
+        }
     }
 }

@@ -95,9 +95,7 @@ public class GrblController {
             return;
         }
         origin = sysMgr.getGrblStatusMonitor().getPosition();
-        for (ICoordListener l : originListeners) {
-            l.onChange(origin);
-        }
+        notifyListeners();
     }
     
     public void goOrigin() {
@@ -137,6 +135,16 @@ public class GrblController {
     
     public float[] getOrigin() {
         return origin.clone();
+    }
+
+    public void forceNotification() {
+        notifyListeners();
+    }
+
+    private void notifyListeners() {
+        for (ICoordListener l : originListeners) {
+            l.onChange(origin);
+        }
     }
 
     private boolean isIdleJogging() {

@@ -71,11 +71,14 @@ public class SystemManager {
     private void wireUpObservers() {
         grblStatusMonitor.addPosListener(cncOrigPanel.getPositionListener());
         grblController.addOriginListener(cncOrigPanel.getOriginListener());
+        grblStatusMonitor.forceNotification();
+        grblController.forceNotification();
     }
     
     private void addStateListeners() {
         stateListeners.add(progCtrlPanel);
         stateListeners.add(imgInfoPanel);
+        stateListeners.add(cncPosPanel);
     }
     
     private static synchronized void createNewInstance() {
@@ -159,7 +162,7 @@ public class SystemManager {
     
     public boolean loadGrblSettings() {
         if (grblCommCtrl.sendCommand(grblSettings.getLoadCommand()) == CommResult.ok) {
-            cncPosPanel.updateParams(grblSettings.getSettings());            
+            notifyStateChanged();
             return true;
         }
         return false;
