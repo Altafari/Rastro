@@ -19,7 +19,6 @@ import rastro.ui.ProgramControlPanel;
 //import rastro.ui.MainDialog;
 
 public class SystemManager {
-    public enum SystemMode {IDLE, RUNNING};    
     private static SystemManager sysMgr;
     
     private Set<IStateListener> stateListeners;
@@ -38,8 +37,6 @@ public class SystemManager {
     private GrblStatusMonitor grblStatusMonitor;
     private GrblController grblController;
     private ProgramController progCtrl;
-        
-    //private SystemMode sysMode;
     
     private SystemManager() {
         stateListeners = new HashSet<IStateListener>();
@@ -50,7 +47,6 @@ public class SystemManager {
     }
     
     private void createSystemObjects() {
-   //     sysMode = SystemMode.IDLE;
         //mainDlg = new MainDialog();
         grblCommCtrl = new CommController();
         rastroCommCtrl = new CommController();        

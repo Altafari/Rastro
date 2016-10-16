@@ -2,6 +2,7 @@ package rastro.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public abstract class RastroCommand implements ICommCommand {
 
@@ -68,8 +69,22 @@ public abstract class RastroCommand implements ICommCommand {
     
     @Override
     public boolean receiveData(InputStream is) throws IOException {
-        // TODO Auto-generated method stub
-        return true;
+        byte[] buff = new byte[1];
+        byte[] reply = new byte[3];
+        int idx = 0;
+        int bytesRead;
+        while (true) {
+            bytesRead = is.read(buff);
+            if (bytesRead > 0) {
+                reply[idx] = buff[0];
+                idx++;
+                if (idx == 3) {
+                    return Arrays.equals(ACK, reply);
+                }
+            } else {
+                return false;
+            }
+        }
     }
     
     @Override

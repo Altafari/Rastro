@@ -32,8 +32,8 @@ public class RastroConfigCommand extends RastroCommand {
     }
     
     private int putShort(short x, int offset) {
-        txBuffer[offset] = (byte)(x >> 8);
-        txBuffer[offset + 1] = (byte)(x & 0xFF);
+        txBuffer[offset] = (byte)(x & 0xFF);
+        txBuffer[offset + 1] = (byte)(x >> 8);
         return offset + 2;
     }
     

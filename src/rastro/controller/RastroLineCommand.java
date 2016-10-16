@@ -5,10 +5,11 @@ import java.io.OutputStream;
 
 public class RastroLineCommand extends RastroCommand {
 
-    private static final byte LINE_HDR[] = {'L', 'N'};  
+    private static final byte LINE_HDR[] = {'L', 'N'};
+    
     public RastroLineCommand(int lineLength) {
         super(lineLength);
-        int buffSize = (int) Math.ceil((float) lineLen / 8.0f) + LINE_HDR.length + CRC_LEN;
+        int buffSize = (lineLen + 7) / 8 + LINE_HDR.length + CRC_LEN;
         txBuffer = new byte[buffSize];
     }
     
