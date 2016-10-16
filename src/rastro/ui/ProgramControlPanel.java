@@ -62,13 +62,10 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
                 break;
             case "pause":
                 CommController rcc = sysMgr.getRastroCommController();
-                rcc.sendCommand(new RastroConfigCommand(1024));
-                rcc.sendCommand(new RastroConfigCommand(1024));
-                rcc.sendCommand(new RastroConfigCommand(1024));
-                rcc.sendCommand(new RastroConfigCommand(1024));
-                RastroLineCommand rlc = new RastroLineCommand(1024);
-                //rlc.packLine(false, new boolean[1024]);
-                //rcc.sendCommand(rlc);
+                rcc.sendCommand(new RastroConfigCommand(8));
+                RastroLineCommand rlc = new RastroLineCommand(8);
+                rlc.packLine(false, new boolean[8]);
+                rcc.sendCommand(rlc);
                 break;
             default:
             }

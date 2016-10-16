@@ -63,8 +63,8 @@ public abstract class RastroCommand implements ICommCommand {
         for (int i = 0; i < data.length - 2; i++) {
             res = CRC_TABLE[((int)data[i] ^ res) & 0xFF] ^ (res >>> 8);
         }
-        data[data.length - 2] = (byte)(res >>> 8);
-        data[data.length - 1] = (byte)(res & 0xFF);
+        data[data.length - 2] = (byte)(res & 0xFF);
+        data[data.length - 1] = (byte)(res >>> 8);
     }
     
     @Override

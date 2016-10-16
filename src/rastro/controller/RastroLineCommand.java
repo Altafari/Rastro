@@ -14,13 +14,11 @@ public class RastroLineCommand extends RastroCommand {
     }
     
     public void packLine(boolean isInverted, boolean[] line) {
-        putHeader(LINE_HDR);
         if (isInverted) {
             packInvertedLine(line, LINE_HDR.length);
         } else {
             packStraightLine(line, LINE_HDR.length);
         }
-        computeCRC16(txBuffer);
     }
 
     private void packStraightLine(boolean[] line, int buffOffset) {
@@ -49,6 +47,8 @@ public class RastroLineCommand extends RastroCommand {
 
     @Override
     public boolean sendData(OutputStream os) throws IOException {
+        putHeader(LINE_HDR);
+        computeCRC16(txBuffer);
         os.write(txBuffer);        
         return true;
     }
