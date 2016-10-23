@@ -47,8 +47,8 @@ public class ImageController {
     }
 
     public boolean isBlack(float mmX, float mmY) {
-        int x = Math.round(pixelSize * mmX);
-        int y = Math.round(pixelSize * mmY);
+        int x = Math.round(mmX / pixelSize);
+        int y = Math.round(mmY / pixelSize);
         if (!isValidCoord(x, y)) {
             return false;
         }

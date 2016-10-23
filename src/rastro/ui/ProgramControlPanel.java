@@ -207,7 +207,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         return radValues[beamRad.getValue()];
     }
     
-    public int getLineStep() {
+    public int getLineSkip() {
         return stepValues[lineStep.getValue()];
     }
 
@@ -231,7 +231,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         if (settings.containsKey(key)) {
             spmY = settings.get(key);
         }
-        updateLineDim(getLineStep() / spmY);
+        updateLineDim(getLineSkip() / spmY);
         updateLineBoundary(sysMgr.getProgramController().getLineSpan());
     }
 }
