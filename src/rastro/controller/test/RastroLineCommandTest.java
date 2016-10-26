@@ -96,8 +96,8 @@ public class RastroLineCommandTest {
         icc.sendData(new MockStream() {
             @Override
             public void write(byte[] buffer) {
-                assertEquals(crcHi, buffer[5]);
-                assertEquals(crcLo, buffer[6]);
+                assertEquals(crcLo, buffer[5]);
+                assertEquals(crcHi, buffer[6]);
             }
         });        
     }

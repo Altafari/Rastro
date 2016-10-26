@@ -2,12 +2,10 @@ package rastro.controller;
 
 import java.util.Iterator;
 import java.util.Map;
-
-import rastro.model.GrblSettings.GrblSetting;
 import rastro.model.GrblSettings;
 import rastro.model.GrblStatusMonitor;
 import rastro.model.GrblStatusMonitor.IModeListener;
-import rastro.model.ScanningShape;
+import rastro.model.ProgramTaskSettings;
 import rastro.system.SystemManager;
 
 public class ProgramController {
@@ -32,29 +30,12 @@ public class ProgramController {
             return;
         }            
         mode = Mode.RUN;
-        Map<GrblSetting, Float> settings = sysMgr.getGrblSettings().getSettings();
-        final ImageController imCon = sysMgr.getImageController();
-        final float[] orig = sysMgr.getGrblController().getOrigin();
-        float[] imDim = sysMgr.getImageController().getDimensions();
-        final float spmX = settings.get(GrblSetting.STEP_PER_MM_X);
-        final float spmY = settings.get(GrblSetting.STEP_PER_MM_Y);
-        final float[] line = getLineSpan();
-        final int lnSkip = sysMgr.getProgramControlPanel().getLineSkip();
-        final float lineStep = lnSkip / spmY;
-        final float maxY = orig[1] + imDim[1];
-        final float[] imgSize = imCon.getDimensions();
-        final ScanningShape scShape = new ScanningShape(beamR, spmX, spmY);
-        final RasterScanner rScanner =
-                new RasterScanner(spmX, spmY, imgSize[0], imgSize[1], scShape.getShape(), lnSkip);
-        rScanner.loadImage(imCon);
-        final int scanLen = rScanner.getLineLength();
-        final RastroConfigCommand configCommand = new RastroConfigCommand(scanLen);
-        configCommand.setExpTime((int)expTime);  //TODO
-        configCommand.setOffset(Math.round(line[0] * spmX));
-        configCommand.setScanMode(false);
-        final RastroLineCommand lineCommand = new RastroLineCommand(scanLen);
-        final Iterator<boolean[]> lines = rScanner.iterator();
-        // pull settings - scanning shape radius
+        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, 0, beamR, (int)expTime); //TODO
+        final Iterator<boolean[]> lines = pts.getScannerIterator();
+        final RastroLineCommand lineCommand = pts.getLineCommand();
+        final float[] origin = sysMgr.getGrblController().getOrigin();
+        final float[] xSpan = getLineSpan();
+        final float yStep = pts.getLineStep();
         prog = new Runnable() {
             GrblStatusMonitor.Mode grblMode;
             LineDir lDir = LineDir.FORWARD;
@@ -63,7 +44,7 @@ public class ProgramController {
                 GrblController grblCtrl = sysMgr.getGrblController();
                 CommController rastroCtrl = sysMgr.getRastroCommController();
                 grblCtrl.setMode(GrblController.Mode.PROGRAM);
-                rastroCtrl.sendCommand(configCommand);
+                rastroCtrl.sendCommand(pts.getConfigCommand());
                 IModeListener modeListener = new IModeListener() {
                     @Override
                     public void onChange(GrblStatusMonitor.Mode mode) {
@@ -79,8 +60,8 @@ public class ProgramController {
                 sysMgr.getGrblStatusMonitor().startMonitoringTask();
                 lineCommand.packLine(false, lines.next());
                 rastroCtrl.sendCommand(lineCommand);
-                float currentY = orig[1];
-                grblCtrl.programMove(new float[] {line[0], currentY}, false);
+                float currentY = origin[1];
+                grblCtrl.programMove(new float[] {xSpan[0], currentY}, false);
                 while (mode == Mode.RUN) {
                     synchronized (this) {
                     if (grblMode != GrblStatusMonitor.Mode.Idle) {
@@ -94,18 +75,18 @@ public class ProgramController {
                     lineCommand.packLine(false, lines.next());
                     rastroCtrl.sendCommand(lineCommand);
                     if (lDir == LineDir.FORWARD) {                        
-                        grblCtrl.programMove(new float[] {line[1], currentY}, false);
+                        grblCtrl.programMove(new float[] {xSpan[1], currentY}, false);
                         lDir = LineDir.BACK;
                     } else {                        
-                        grblCtrl.programMove(new float[] {line[0], currentY}, false);
+                        grblCtrl.programMove(new float[] {xSpan[0], currentY}, false);
                         lDir = LineDir.FORWARD;
                     }
-                    currentY += lineStep;
-                    if (currentY > maxY) {
-                        grblCtrl.programMove(orig, false);
+                    currentY += yStep;
+                    if (!lines.hasNext()) {
+                        grblCtrl.programMove(origin, false);
                         mode = Mode.IDLE;
                     } else {
-                        grblCtrl.programMove(new float[] {0.0f, lineStep}, true);
+                        grblCtrl.programMove(new float[] {0.0f, yStep}, true);
                     }
                     //TODO: add delay
                     grblMode = null;

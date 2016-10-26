@@ -4,10 +4,9 @@ import java.util.Iterator;
 
 public class RasterScanner implements Iterable<boolean[]> {
 
-    private float spmX;
-    private float spmY;
-    private int width;
-    private int height;
+    private float incX;
+    private float incY;
+    private int[] rSize;
     private int nLine;
     private boolean[][] buffer;
     private boolean[][] shape;
@@ -16,26 +15,21 @@ public class RasterScanner implements Iterable<boolean[]> {
     private int lnStep;
     private ImageController imCon;
 
-    public RasterScanner(float stepPermmX, float stepPermmY, float sizeXmm, float sizeYmm,
+    public RasterScanner(float stepPermmX, float stepPermmY, int[] rasterSize,
             boolean[][] scShape, int lineStep) {
-        spmX = stepPermmX;
-        spmY = stepPermmY;
-        width = (int)Math.round(sizeXmm * spmX);
-        height = (int)Math.round(sizeYmm * spmY);
+        incX = 1.0f / stepPermmX;
+        incY = 1.0f / stepPermmY;
+        rSize = rasterSize;
         shape = scShape;
         vPadding = (shape.length - 1) / 2; // both scannerShape dimensions must be odd
         hPadding = (shape[0].length - 1) / 2;
         lnStep = lineStep;
-        buffer = new boolean[shape.length][width + 2 * hPadding];
+        buffer = new boolean[shape.length][rSize[0] + 2 * hPadding];
     }
 
     public void loadImage(ImageController imgController) {
         imCon = imgController;
         preFillBuffer();
-    }
-
-    public int getLineLength() {
-        return width;
     }
 
     private void preFillBuffer() {
@@ -46,10 +40,8 @@ public class RasterScanner implements Iterable<boolean[]> {
     }
 
     private void fillLine(boolean[] row, int y) {
-        float xInc = 1.0f / spmX;
-        float yInc = 1.0f / spmY;
         for (int x = 0; x < row.length; x++) {
-            row[x] = imCon.isBlack((x - hPadding) * xInc, y * yInc);
+            row[x] = imCon.isBlack((x - hPadding) * incX, y * incY);
         }
     }
 
@@ -63,8 +55,8 @@ public class RasterScanner implements Iterable<boolean[]> {
     }
 
     private boolean[] scanLine() {
-        boolean[] res = new boolean[width]; // When shape "true" pixel intersects with image "true", then isOn false
-        for (int x = 0; x < width; x++) {
+        boolean[] res = new boolean[rSize[0]]; // When shape "true" pixel intersects with image "true", then isOn false
+        for (int x = 0; x < rSize[0]; x++) {
             boolean isOn = true;
             for (int i = 0; i <= vPadding * 2; i++) {
                 for (int j = 0; j <= hPadding * 2; j++) {
@@ -82,7 +74,7 @@ public class RasterScanner implements Iterable<boolean[]> {
 
             @Override
             public boolean hasNext() {
-                return nLine <= height + vPadding;
+                return nLine <= rSize[1] + vPadding;
             }
 
             @Override

@@ -51,7 +51,7 @@ public class RasterScannerTest {
 
     @Test
     public void scanAtSingleStepShouldReturnTheSameNumberOfLines() {
-        RasterScanner rs = new RasterScanner(10, 10, 1, 1, shape3dot, 1);
+        RasterScanner rs = new RasterScanner(10, 10, new int[] {10, 10}, shape3dot, 1);
         rs.loadImage(imCon);
         Iterator<boolean[]> it = rs.iterator();
         ArrayList<boolean[]> result = new ArrayList<boolean[]>();
@@ -92,7 +92,7 @@ public class RasterScannerTest {
                 }
             }
         });
-        RasterScanner rs = new RasterScanner(hSize, vSize, 1, 1, shape3diamond, 1);
+        RasterScanner rs = new RasterScanner(hSize, vSize, new int[] {hSize, vSize}, shape3diamond, 1);
         rs.loadImage(imCon);
         Iterator<boolean[]> it = rs.iterator();
         ArrayList<boolean[]> result = new ArrayList<boolean[]>();
@@ -109,7 +109,7 @@ public class RasterScannerTest {
     @Test
     public void scanAtMultipleStepShouldReturnTheFractionNumberOfLines() {
         for (int stepSize = 1; stepSize < 9; stepSize++) {
-            RasterScanner rs = new RasterScanner(16, 16, 1, 1, shape5dot, stepSize);
+            RasterScanner rs = new RasterScanner(16, 16, new int[] {16, 16}, shape5dot, stepSize);
             rs.loadImage(imCon);
             Iterator<boolean[]> it = rs.iterator();
             ArrayList<boolean[]> result = new ArrayList<boolean[]>();
@@ -122,7 +122,7 @@ public class RasterScannerTest {
     
     @Test
     public void scanAtMultipleStepShouldReturnLineOfProperLength() {
-        RasterScanner rs = new RasterScanner(16, 16, 1, 1, shape5dot, 4);
+        RasterScanner rs = new RasterScanner(16, 16, new int[] {16, 16}, shape5dot, 4);
         rs.loadImage(imCon);
         Iterator<boolean[]> it = rs.iterator();
         ArrayList<boolean[]> result = new ArrayList<boolean[]>();
@@ -162,7 +162,7 @@ public class RasterScannerTest {
                     }
                 }
             });
-            RasterScanner rs = new RasterScanner(hSize, vSize, 1, 1, shape5dot, stepSize);
+            RasterScanner rs = new RasterScanner(hSize, vSize,new int[] {hSize, vSize}, shape5dot, stepSize);
             rs.loadImage(imCon);
             Iterator<boolean[]> it = rs.iterator();
             ArrayList<boolean[]> result = new ArrayList<boolean[]>();

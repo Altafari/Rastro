@@ -52,12 +52,12 @@ public class RastroConfigCommandTest {
                 public void write(byte[] buffer) {
                     assertEquals('C', buffer[0]);
                     assertEquals('F', buffer[1]);
-                    assertEquals((byte) (LINE_LEN[i] >> 8), buffer[2]);
-                    assertEquals((byte) (LINE_LEN[i] &  0xFF), buffer[3]);
-                    assertEquals((byte) (LINE_OFFSET[i] >> 8), buffer[4]);
-                    assertEquals((byte) (LINE_OFFSET[i] &  0xFF), buffer[5]);
-                    assertEquals((byte) (EXP_TIME[i] >> 8), buffer[6]);
-                    assertEquals((byte) (EXP_TIME[i] &  0xFF), buffer[7]);
+                    assertEquals((byte) (LINE_LEN[i] &  0xFF), buffer[2]);
+                    assertEquals((byte) (LINE_LEN[i] >> 8), buffer[3]);
+                    assertEquals((byte) (LINE_OFFSET[i] &  0xFF), buffer[4]);
+                    assertEquals((byte) (LINE_OFFSET[i] >> 8), buffer[5]);
+                    assertEquals((byte) (EXP_TIME[i] &  0xFF), buffer[6]);
+                    assertEquals((byte) (EXP_TIME[i] >> 8), buffer[7]);
                     assertEquals((byte) (MODE[i] ? 0 : 1), buffer[8]);
                     assertEquals(11, buffer.length);   
                 }
