@@ -132,12 +132,15 @@ public class ProgramController {
     }
     
     private float computeMoveCompletionTime(float dist, float feedRate, float accRate) {
-        
-        return 0.0f;
-    }
-    
-    private void schedulePeriodicWithDelay(int delay, int interval) {
-        
+        float accTime = feedRate / accRate;
+        float accDist = feedRate * 0.5f * accTime;
+        if (accDist >= 0.5f * dist) {
+            // No steady feed rate region
+            return 2.0f * (float) Math.sqrt(dist / accRate);    // Divide and multiply by 2
+        } else {
+            // Acceleration completes
+            return 2.0f * accTime + (dist - 2.0f * accDist) / feedRate;
+        }
     }
 }
 

@@ -11,6 +11,10 @@ import rastro.model.GrblSettings.GrblSetting;
 import rastro.system.SystemManager;
 
 public class ProgramTaskSettings {
+
+    private final float HW_TIME_QUANT_MS = 5.0E-4f;
+    private final float MS_TO_SECOND = 1.0E-3f;
+
     private SystemManager sysMgr;
     private float spmX;
     private float spmY;
@@ -18,9 +22,9 @@ public class ProgramTaskSettings {
     private int[] rSize;
     private int nSkip;
     private float beamR;
-    private int expTime;  
+    private float expTime;
     
-    public ProgramTaskSettings(SystemManager sysManager, float xSpan, float beamRad, int expoTime) {
+    public ProgramTaskSettings(SystemManager sysManager, float xSpan, float beamRad, float expoTime) {
         sysMgr = sysManager;
         spmX = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_X);
         spmY = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_Y);
@@ -41,9 +45,9 @@ public class ProgramTaskSettings {
     
     public ICommCommand getConfigCommand() {
         RastroConfigCommand configCmd = new RastroConfigCommand(rSize[0]);
-        configCmd.setExpTime(expTime);
-        configCmd.setOffset(0);
-        configCmd.setScanMode(false);
+        configCmd.setExpTime(computeSinglePixelExposition());
+        configCmd.setOffset(0); // Reserved
+        configCmd.setScanMode(false);   //Zig-zag mode, TODO: Connect to real control
         return configCmd;
     }
     
@@ -53,5 +57,17 @@ public class ProgramTaskSettings {
     
     public float getLineStep() {
         return spmY * nSkip;
+    }
+    
+    public float getMaxFeedRate(float maxHwFeedRate) { // Output: mm/s
+        return Math.min(MS_TO_SECOND / computeLinearExposition(), maxHwFeedRate);
+    }
+    
+    private int computeSinglePixelExposition() {    // Computes integer value for HW timer
+        return Math.round(computeLinearExposition() / (HW_TIME_QUANT_MS * spmX));
+    }
+    
+    private float computeLinearExposition() {   // expTime: ms/mm^2
+        return expTime * getLineStep();         // Output: ms/mm linear exposition
     }
 }
