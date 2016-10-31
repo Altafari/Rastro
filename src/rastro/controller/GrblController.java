@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import rastro.model.GrblSettings.GrblSetting;
 import rastro.model.ICoordListener;
 import rastro.system.SystemManager;
 
@@ -68,27 +70,6 @@ public class GrblController {
         origin = new float[3];
         originListeners = new HashSet<ICoordListener>();
     }
-    
-    public void joggingMove(float[] pos, boolean relative) {
-        if (mode != Mode.JOGGING) {
-            return;
-        } else {
-            int pBuffState = sysMgr.getGrblStatusMonitor().getPlannerBufferState();
-            if (pBuffState > 1) {
-                return;
-            }
-            String pref;
-            if (relative) {
-                pref = "G91";
-            } else {
-                pref = "G90";
-            }
-            String cmdStr = String.format("%s G0 X%f Y%f\n", pref, pos[0], pos[1]);
-            ICommCommand moveCmd = new ControlCommand(cmdStr);
-            sysMgr.getGrblCommController().sendCommand(moveCmd);
-            sysMgr.getGrblStatusMonitor().startMonitoringTask();
-        }
-    }
 
     public void setOrigin() {
         if (!isIdleJogging()) {
@@ -105,22 +86,42 @@ public class GrblController {
         joggingMove(origin, false);
     }
 
-    public void programMove(float[] pos, boolean relative) {
+    public void joggingMove(float[] pos, boolean isRelative) {
+        if (mode != Mode.JOGGING) {
+            return;
+        } else {
+            int pBuffState = sysMgr.getGrblStatusMonitor().getPlannerBufferState();
+            if (pBuffState > 1) {
+                return;
+            }
+            moveCmd(pos, isRelative, 0.0f);
+            sysMgr.getGrblStatusMonitor().startMonitoringTask();
+        }
+    }
+    
+    public void programMove(float[] pos, boolean isRelative, float feedRate) {
         if (mode != Mode.PROGRAM) {
             return;
         } else {
-            String pref;
-            if (relative) {
-                pref = "G91";
-            } else {
-                pref = "G90";
-            }
-            String cmdStr = String.format("%s G0 X%f Y%f\n", pref, pos[0], pos[1]);
-            ICommCommand moveCmd = new ControlCommand(cmdStr);
-            sysMgr.getGrblCommController().sendCommand(moveCmd);
+           moveCmd(pos, isRelative, feedRate);
         }
     }
 
+    private void moveCmd(float[] pos, boolean isRelative, float feedRate) {
+        String pref;
+        if (isRelative) {
+            pref = "G91";
+        } else {
+            pref = "G90";
+        }
+        if (feedRate == 0) {
+            feedRate = sysMgr.getGrblSettings().getSettings().get(GrblSetting.MAX_RATE_X);
+        }
+        String cmdStr = String.format("%s G1 X%f Y%f F%f\n", pref, pos[0], pos[1], feedRate);
+        ICommCommand moveCmd = new ControlCommand(cmdStr);
+        sysMgr.getGrblCommController().sendCommand(moveCmd);
+    }
+    
     public void addOriginListener(ICoordListener l) {
         originListeners.add(l);
     }

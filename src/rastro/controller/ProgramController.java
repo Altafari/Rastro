@@ -30,12 +30,13 @@ public class ProgramController {
             return;
         }            
         mode = Mode.RUN;
-        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, 0, beamR, (int)expTime); //TODO
+        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, beamR, expTime);
         final Iterator<boolean[]> lines = pts.getScannerIterator();
         final RastroLineCommand lineCommand = pts.getLineCommand();
         final float[] origin = sysMgr.getGrblController().getOrigin();
         final float[] xSpan = getLineSpan();
         final float yStep = pts.getLineStep();
+        final float feedRate = pts.getMaxFeedRate();
         prog = new Runnable() {
             GrblStatusMonitor.Mode grblMode;
             LineDir lDir = LineDir.FORWARD;
@@ -61,7 +62,7 @@ public class ProgramController {
                 lineCommand.packLine(false, lines.next());
                 rastroCtrl.sendCommand(lineCommand);
                 float currentY = origin[1];
-                grblCtrl.programMove(new float[] {xSpan[0], currentY}, false);
+                grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
                 while (mode == Mode.RUN) {
                     synchronized (this) {
                     if (grblMode != GrblStatusMonitor.Mode.Idle) {
@@ -75,20 +76,19 @@ public class ProgramController {
                     lineCommand.packLine(false, lines.next());
                     rastroCtrl.sendCommand(lineCommand);
                     if (lDir == LineDir.FORWARD) {                        
-                        grblCtrl.programMove(new float[] {xSpan[1], currentY}, false);
+                        grblCtrl.programMove(new float[] {xSpan[1], currentY}, false, feedRate);
                         lDir = LineDir.BACK;
                     } else {                        
-                        grblCtrl.programMove(new float[] {xSpan[0], currentY}, false);
+                        grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, feedRate);
                         lDir = LineDir.FORWARD;
                     }
                     currentY += yStep;
                     if (!lines.hasNext()) {
-                        grblCtrl.programMove(origin, false);
+                        grblCtrl.programMove(origin, false, 0.0f);
                         mode = Mode.IDLE;
                     } else {
-                        grblCtrl.programMove(new float[] {0.0f, yStep}, true);
+                        grblCtrl.programMove(new float[] {0.0f, yStep}, true, 0.0f);
                     }
-                    //TODO: add delay
                     grblMode = null;
                     sysMgr.getGrblStatusMonitor().startMonitoringTask();
                 }

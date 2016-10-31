@@ -13,7 +13,7 @@ import rastro.system.SystemManager;
 public class ProgramTaskSettings {
 
     private final float HW_TIME_QUANT_MS = 5.0E-4f;
-    private final float MS_TO_SECOND = 1.0E-3f;
+    private final float MS_TO_MIN = 6.0E4f;
 
     private SystemManager sysMgr;
     private float spmX;
@@ -24,7 +24,7 @@ public class ProgramTaskSettings {
     private float beamR;
     private float expTime;
     
-    public ProgramTaskSettings(SystemManager sysManager, float xSpan, float beamRad, float expoTime) {
+    public ProgramTaskSettings(SystemManager sysManager, float beamRad, float expoTime) {
         sysMgr = sysManager;
         spmX = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_X);
         spmY = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_Y);
@@ -47,7 +47,7 @@ public class ProgramTaskSettings {
         RastroConfigCommand configCmd = new RastroConfigCommand(rSize[0]);
         configCmd.setExpTime(computeSinglePixelExposition());
         configCmd.setOffset(0); // Reserved
-        configCmd.setScanMode(false);   //Zig-zag mode, TODO: Connect to real control
+        configCmd.setScanMode(false);   //Zig-zag mode
         return configCmd;
     }
     
@@ -56,11 +56,12 @@ public class ProgramTaskSettings {
     }
     
     public float getLineStep() {
-        return spmY * nSkip;
+        return nSkip / spmY;
     }
     
-    public float getMaxFeedRate(float maxHwFeedRate) { // Output: mm/s
-        return Math.min(MS_TO_SECOND / computeLinearExposition(), maxHwFeedRate);
+    public float getMaxFeedRate() { // Output: mm/s
+        float maxHwRate = sysMgr.getGrblSettings().getSettings().get(GrblSetting.MAX_RATE_X);
+        return Math.min(MS_TO_MIN / computeLinearExposition(), maxHwRate);
     }
     
     private int computeSinglePixelExposition() {    // Computes integer value for HW timer
