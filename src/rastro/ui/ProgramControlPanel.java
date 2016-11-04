@@ -43,7 +43,6 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JSlider beamRad;;
     private final float[] radValues = {0.01f, 0.015f, 0.02f, 0.025f, 0.03f, 0.035f, 0.04f, 0.045f, 0.05f};
     private JSlider lineStep;
-    private final int[] stepValues = {1, 2, 3, 4, 5, 6};
     private JFormattedTextField overScan;
     private JFormattedTextField expTime;
     private JLabel lineStepDim;
@@ -130,10 +129,9 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
         Hashtable<Object, Object> stepLabels = new Hashtable<Object, Object>();
-        stepLabels.put(0, new JLabel("1"));
-        stepLabels.put(1, new JLabel("2"));
-        stepLabels.put(3, new JLabel("4"));
-        stepLabels.put(5, new JLabel("6"));
+        for (int i = 0; i< 6; i++) {
+            stepLabels.put(i, new JLabel(Integer.toString(i + 1)));
+        }
         lineStep.setLabelTable(stepLabels);
         lineStep.setAlignmentX(CENTER_ALIGNMENT);
         lineStep.addChangeListener(changeListener);
@@ -154,8 +152,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         
         JPanel textFieldPanel = new JPanel();        
         textFieldPanel.setLayout(new GridLayout(4, 1));        
-        
-        
+
         lineStepDim = new JLabel();
         JPanel lineStepDimPanel = new JPanel();
         lineStepDimPanel.setAlignmentX(CENTER_ALIGNMENT);
@@ -199,7 +196,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     }
 
     public int getLineSkip() {
-        return stepValues[lineStep.getValue()];
+        return lineStep.getValue() + 1;
     }
     
     public float getBeamRad() {
