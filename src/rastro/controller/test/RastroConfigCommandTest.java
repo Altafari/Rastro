@@ -11,6 +11,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import rastro.controller.*;
+import rastro.controller.RastroConfigCommand.ScanMode;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RastroCommand.class,
@@ -21,7 +22,7 @@ public class RastroConfigCommandTest {
     private final int[] LINE_LEN = {856, 352, 88, 11542};
     private final int[] LINE_OFFSET = {22, 1582, 7443, 8887};
     private final int[] EXP_TIME = {1506, 41, 4577, 6896};
-    private final boolean[] MODE = {false, false, true, false};
+    private final ScanMode[] MODE = {ScanMode.PROGRESSIVE, ScanMode.ZIGZAG, ScanMode.ZIGZAG, ScanMode.PROGRESSIVE};
     private int i;
     
     private class MockStream extends OutputStream {
@@ -58,7 +59,7 @@ public class RastroConfigCommandTest {
                     assertEquals((byte) (LINE_OFFSET[i] >> 8), buffer[5]);
                     assertEquals((byte) (EXP_TIME[i] &  0xFF), buffer[6]);
                     assertEquals((byte) (EXP_TIME[i] >> 8), buffer[7]);
-                    assertEquals((byte) (MODE[i] ? 0 : 1), buffer[8]);
+                    assertEquals((byte) (MODE[i] == ScanMode.PROGRESSIVE ? 1 : 0), buffer[8]);
                     assertEquals(11, buffer.length);   
                 }
             });

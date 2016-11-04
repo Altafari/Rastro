@@ -41,9 +41,9 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JButton stopBtn;
     private JButton pauseBtn;
     private JSlider beamRad;;
-    private final float[] radValues = {0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f};
+    private final float[] radValues = {0.01f, 0.015f, 0.02f, 0.025f, 0.03f, 0.035f, 0.04f, 0.045f, 0.05f};
     private JSlider lineStep;
-    private final int[] stepValues = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    private final int[] stepValues = {1, 2, 3, 4, 5, 6};
     private JFormattedTextField overScan;
     private JFormattedTextField expTime;
     private JLabel lineStepDim;
@@ -82,12 +82,6 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private final PropertyChangeListener propChangeListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            Object src = evt.getSource();
-            if (src == overScan) {
-                sysMgr.getProgramController().setOverScan(((Number) overScan.getValue()).floatValue());
-            } else if (src == expTime) {
-                sysMgr.getProgramController().setExpTime(((Number) expTime.getValue()).floatValue());
-            }
             sysMgr.notifyStateChanged();
         }        
     };
@@ -116,9 +110,9 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         beamRad.setPaintTicks(true);
         beamRad.setPaintLabels(true);
         Hashtable<Object, Object> radLabels = new Hashtable<Object, Object>();
-        radLabels.put(0, new JLabel("0.01"));
-        radLabels.put(4, new JLabel("0.05"));
-        radLabels.put(8, new JLabel("0.09"));
+        radLabels.put(0, new JLabel("0.005"));
+        radLabels.put(4, new JLabel("0.025"));
+        radLabels.put(8, new JLabel("0.05"));
         beamRad.setLabelTable(radLabels);
         beamRad.setAlignmentX(CENTER_ALIGNMENT);
         beamRad.addChangeListener(changeListener);
@@ -130,15 +124,16 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         
         JPanel stepSliderPanel = new JPanel();
         stepSliderPanel.setLayout(new BoxLayout(stepSliderPanel, BoxLayout.PAGE_AXIS));
-        lineStep = new JSlider(JSlider.VERTICAL, 0, 8, 3);
+        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 3);
         lineStep.setMajorTickSpacing(4);
         lineStep.setMinorTickSpacing(1);
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
         Hashtable<Object, Object> stepLabels = new Hashtable<Object, Object>();
         stepLabels.put(0, new JLabel("1"));
-        stepLabels.put(4, new JLabel("5"));
-        stepLabels.put(8, new JLabel("9"));
+        stepLabels.put(1, new JLabel("2"));
+        stepLabels.put(3, new JLabel("4"));
+        stepLabels.put(5, new JLabel("6"));
         lineStep.setLabelTable(stepLabels);
         lineStep.setAlignmentX(CENTER_ALIGNMENT);
         lineStep.addChangeListener(changeListener);
@@ -175,11 +170,11 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         textFieldPanel.add(lineBoundaryPanel);        
         overScan = new JFormattedTextField(NumberFormat.getNumberInstance());
         overScan.setPreferredSize(DIM_TEXTFIELD);
-        overScan.setValue(new Float(0.0f));
+        overScan.setValue(new Float(15.0f));
         overScan.addPropertyChangeListener(propChangeListener);
         expTime = new JFormattedTextField(NumberFormat.getNumberInstance());
         expTime.setPreferredSize(DIM_TEXTFIELD);
-        expTime.setValue(new Float(0.0f));
+        expTime.setValue(new Float(300.0f));
         expTime.addPropertyChangeListener(propChangeListener);
         
         JPanel overScanPanel = new JPanel();
@@ -202,19 +197,27 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         this.add(buttonPanel);
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
     }
-    
-    public float getBeamRadius() {
-        return radValues[beamRad.getValue()];
-    }
-    
+
     public int getLineSkip() {
         return stepValues[lineStep.getValue()];
+    }
+    
+    public float getBeamRad() {
+        return radValues[beamRad.getValue()];
+    }
+
+    public float getExpTime() {
+        return ((Number) expTime.getValue()).floatValue();
+    }
+    
+    public float getOverScan() {
+        return ((Number) overScan.getValue()).floatValue();
     }
 
     private void updateLineDim(float dim) {
         lineStepDim.setText(String.format("Scan step: %1.3f mm", dim));
     }
-    
+
     private void updateLineBoundary(float[] span) {
         lineBoundary.setText(String.format("Span: %3.1f~%3.1f mm", span[0], span[1]));
     }

@@ -5,8 +5,7 @@ import java.io.OutputStream;
 
 public class RastroConfigCommand extends RastroCommand {
     
-    public static final byte MODE_ZIGZAG = 0;
-    public static final byte MODE_LINEBYLINE = 1;
+    public enum ScanMode {ZIGZAG, PROGRESSIVE}
     private static final byte[] CFG_HDR = {'C', 'F'};
     private static final int CFG_FIELDS_LEN = 7;    
     private short lnOffset;
@@ -27,8 +26,8 @@ public class RastroConfigCommand extends RastroCommand {
         expTime = (short) expositionTime;
     }
     
-    public void setScanMode(boolean isZigZag) {
-        mode = isZigZag ? MODE_ZIGZAG : MODE_LINEBYLINE;
+    public void setScanMode(ScanMode scanMode) {
+        mode = (scanMode == ScanMode.PROGRESSIVE)? (byte)1 : 0;
     }
     
     private int putShort(short x, int offset) {

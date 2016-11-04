@@ -7,17 +7,15 @@ import rastro.model.GrblStatusMonitor;
 import rastro.model.GrblStatusMonitor.IModeListener;
 import rastro.model.ProgramTaskSettings;
 import rastro.system.SystemManager;
+import rastro.ui.ProgramControlPanel;
 
 public class ProgramController {
     
     public enum Mode {IDLE, RUN, PAUSE}
-    private enum LineDir {FORWARD, BACK};
+    private enum LineDir {FORWARD, BACK}
     private Mode mode;
     private SystemManager sysMgr;
     private Runnable prog;
-    private float overScan;
-    private float expTime = 100;    //TODO
-    private float beamR = 0.05f;
     private Thread progThread;
     
     public ProgramController(SystemManager sysManager) {
@@ -26,11 +24,12 @@ public class ProgramController {
     }
     
     public synchronized void startProgram() {
-        if (mode != Mode.IDLE) { // || !sysMgr.getImageController().isLoaded()) {
+        if (mode != Mode.IDLE || !sysMgr.getImageController().isLoaded()) {
             return;
         }            
         mode = Mode.RUN;
-        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, beamR, expTime);
+        ProgramControlPanel pcp = sysMgr.getProgramControlPanel();
+        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, pcp.getBeamRad(), pcp.getExpTime());
         final Iterator<boolean[]> lines = pts.getScannerIterator();
         final RastroLineCommand lineCommand = pts.getLineCommand();
         final float[] origin = sysMgr.getGrblController().getOrigin();
@@ -73,8 +72,10 @@ public class ProgramController {
                             }
                         }
                     }
-                    lineCommand.packLine(false, lines.next());
-                    rastroCtrl.sendCommand(lineCommand);
+                    if (lDir == LineDir.BACK || pts.isZigZag()) {
+                        lineCommand.packLine(false, lines.next());
+                        rastroCtrl.sendCommand(lineCommand);
+                    }
                     if (lDir == LineDir.FORWARD) {                        
                         grblCtrl.programMove(new float[] {xSpan[1], currentY}, false, feedRate);
                         lDir = LineDir.BACK;
@@ -82,12 +83,14 @@ public class ProgramController {
                         grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, feedRate);
                         lDir = LineDir.FORWARD;
                     }
-                    currentY += yStep;
-                    if (!lines.hasNext()) {
+                    if (lines.hasNext()) {
+                        if (lDir == LineDir.BACK || pts.isZigZag()) {
+                            currentY += yStep;
+                            grblCtrl.programMove(new float[] {0.0f, yStep}, true, 0.0f);
+                        }
+                    } else {
                         grblCtrl.programMove(origin, false, 0.0f);
                         mode = Mode.IDLE;
-                    } else {
-                        grblCtrl.programMove(new float[] {0.0f, yStep}, true, 0.0f);
                     }
                     grblMode = null;
                     sysMgr.getGrblStatusMonitor().startMonitoringTask();
@@ -108,11 +111,8 @@ public class ProgramController {
         
     }
     
-    public void setOverScan(float val) {
-        overScan = val;
-    }
-    
     public float[] getLineSpan() {
+        float overScan = sysMgr.getProgramControlPanel().getOverScan();
         float[] origin = sysMgr.getGrblController().getOrigin();
         float[] imgDim = sysMgr.getImageController().getDimensions();
         float maxTravelX = 0.0f;
@@ -126,11 +126,7 @@ public class ProgramController {
         lineSpan[1] = Math.min(maxTravelX, imgDim[0] + origin[0] + overScan);
         return lineSpan;
     }
-    
-    public void setExpTime(float val) {
-        expTime = val;
-    }
-    
+ /*
     private float computeMoveCompletionTime(float dist, float feedRate, float accRate) {
         float accTime = feedRate / accRate;
         float accDist = feedRate * 0.5f * accTime;
@@ -141,7 +137,7 @@ public class ProgramController {
             // Acceleration completes
             return 2.0f * accTime + (dist - 2.0f * accDist) / feedRate;
         }
-    }
+    }*/
 }
 
 

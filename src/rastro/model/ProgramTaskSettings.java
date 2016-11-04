@@ -6,6 +6,7 @@ import rastro.controller.ICommCommand;
 import rastro.controller.ImageController;
 import rastro.controller.RasterScanner;
 import rastro.controller.RastroConfigCommand;
+import rastro.controller.RastroConfigCommand.ScanMode;
 import rastro.controller.RastroLineCommand;
 import rastro.model.GrblSettings.GrblSetting;
 import rastro.system.SystemManager;
@@ -23,6 +24,7 @@ public class ProgramTaskSettings {
     private int nSkip;
     private float beamR;
     private float expTime;
+    private ScanMode scanMode = ScanMode.PROGRESSIVE;
     
     public ProgramTaskSettings(SystemManager sysManager, float beamRad, float expoTime) {
         sysMgr = sysManager;
@@ -47,7 +49,7 @@ public class ProgramTaskSettings {
         RastroConfigCommand configCmd = new RastroConfigCommand(rSize[0]);
         configCmd.setExpTime(computeSinglePixelExposition());
         configCmd.setOffset(0); // Reserved
-        configCmd.setScanMode(false);   //Zig-zag mode
+        configCmd.setScanMode(scanMode);
         return configCmd;
     }
     
@@ -55,6 +57,10 @@ public class ProgramTaskSettings {
         return new RastroLineCommand(rSize[0]);
     }
     
+    public boolean isZigZag() {
+        return scanMode == ScanMode.ZIGZAG;
+    }
+
     public float getLineStep() {
         return nSkip / spmY;
     }
