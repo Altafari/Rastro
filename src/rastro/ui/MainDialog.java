@@ -13,6 +13,7 @@ public class MainDialog {
         addComponentsToPane(frame.getContentPane());
         frame.pack();
         frame.setVisible(true);
+        frame.setResizable(false);
     }
 
     private static void addComponentsToPane(Container pane) {

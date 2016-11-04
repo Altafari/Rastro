@@ -3,6 +3,7 @@ package rastro.ui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.Callable;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -12,7 +13,6 @@ import javax.swing.JTextField;
 
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
-import rastro.system.SystemManager;
 
 public class CommPanel extends BorderedTitledPanel {
 
@@ -26,13 +26,16 @@ public class CommPanel extends BorderedTitledPanel {
     private JButton btnOpen;
     private JButton btnTest;
     private CommController cCon;
+    private Callable<Boolean> testCmd;
     private static final Dimension DIM_PORT_FIELD = new Dimension(130, 22);
     private static final Dimension DIM_BAUD_FIELD = new Dimension(80, 22);
     private static final Dimension DIM_LINK_FIELD = new Dimension(40, 22);
 
-    public CommPanel(String title, String[] allowedBaudRates, CommController controller) {
+    public CommPanel(String title, String[] allowedBaudRates,
+            CommController controller, Callable<Boolean> testCommand) {
         super(title);
         cCon = controller;
+        testCmd = testCommand;
         comPortName = new JComboBox<String>(CommController.getPortList());
         comPortName.setMinimumSize(DIM_PORT_FIELD);
         comPortName.setPreferredSize(DIM_PORT_FIELD);
@@ -83,9 +86,13 @@ public class CommPanel extends BorderedTitledPanel {
                 case "test":
                 (new Thread(new Runnable() {
                     public void run() {
-                        if (SystemManager.getInstance().loadGrblSettings()) {
-                            linkStatus.setText("Pass");
-                        } else {
+                        try {
+                            if (testCmd.call()) {
+                                linkStatus.setText("Pass");
+                            } else {
+                                linkStatus.setText("Fail");
+                            }
+                        } catch (Exception e) {
                             linkStatus.setText("Fail");
                         }
                     }

@@ -2,12 +2,14 @@ package rastro.system;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import rastro.controller.CommController;
 import rastro.controller.CommController.CommResult;
 import rastro.controller.GrblController;
 import rastro.controller.ImageController;
 import rastro.controller.ProgramController;
+import rastro.controller.RastroConfigCommand;
 import rastro.model.GrblSettings;
 import rastro.model.GrblStatusMonitor;
 import rastro.ui.CncOriginPanel;
@@ -47,11 +49,22 @@ public class SystemManager {
     }
     
     private void createSystemObjects() {
-        //mainDlg = new MainDialog();
+        Callable<Boolean> grblTestCmd = new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return loadGrblSettings();
+            }
+        };
+        Callable<Boolean> rastroTestCmd = new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return checkRastroConnection();
+            }
+        };
         grblCommCtrl = new CommController();
         rastroCommCtrl = new CommController();        
-        grblCommPanel = new CommPanel("GRBL", new String[] { "115200", "9600" }, grblCommCtrl);
-        rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl);
+        grblCommPanel = new CommPanel("GRBL", new String[] { "115200", "9600" }, grblCommCtrl, grblTestCmd);
+        rastroCommPanel = new CommPanel("Rastro", new String[] { "115200" }, rastroCommCtrl, rastroTestCmd);
         cncOrigPanel = new CncOriginPanel(this);
         cncPosPanel = new CncPositioningPanel(this);
         grblSettings = new GrblSettings();
@@ -162,5 +175,9 @@ public class SystemManager {
             return true;
         }
         return false;
+    }
+
+    private boolean checkRastroConnection() {
+        return rastroCommCtrl.sendCommand(new RastroConfigCommand(0)) == CommResult.ok;
     }
 }
