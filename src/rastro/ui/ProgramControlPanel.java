@@ -110,8 +110,8 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         beamRad.setPaintTicks(true);
         beamRad.setPaintLabels(true);
         Hashtable<Object, Object> radLabels = new Hashtable<Object, Object>();
-        radLabels.put(0, new JLabel("0.005"));
-        radLabels.put(4, new JLabel("0.025"));
+        radLabels.put(0, new JLabel("0.01"));
+        radLabels.put(4, new JLabel("0.03"));
         radLabels.put(8, new JLabel("0.05"));
         beamRad.setLabelTable(radLabels);
         beamRad.setAlignmentX(CENTER_ALIGNMENT);
