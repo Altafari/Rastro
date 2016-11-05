@@ -11,20 +11,20 @@ import rastro.ui.ProgramControlPanel;
 
 public class ProgramController {
     
-    public enum Mode {IDLE, RUN, PAUSE}
+    public enum Mode {STOP, RUN, PAUSE}
     private enum LineDir {FORWARD, BACK}
-    private Mode mode;
+    private volatile Mode mode;
     private SystemManager sysMgr;
     private Runnable prog;
     private Thread progThread;
     
     public ProgramController(SystemManager sysManager) {
-        mode = Mode.IDLE;
+        mode = Mode.STOP;
         sysMgr = sysManager;
     }
     
     public synchronized void startProgram() {
-        if (mode != Mode.IDLE || !sysMgr.getImageController().isLoaded()) {
+        if (mode != Mode.STOP || !sysMgr.getImageController().isLoaded()) {
             return;
         }            
         mode = Mode.RUN;
@@ -62,7 +62,14 @@ public class ProgramController {
                 rastroCtrl.sendCommand(lineCommand);
                 float currentY = origin[1];
                 grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
-                while (mode == Mode.RUN) {
+                while (mode == Mode.RUN || mode == Mode.PAUSE) {
+                    while (mode == Mode.PAUSE) {
+                        try {
+                            this.wait(100);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
                     synchronized (this) {
                     if (grblMode != GrblStatusMonitor.Mode.Idle) {
                             try {
@@ -90,7 +97,7 @@ public class ProgramController {
                         }
                     } else {
                         grblCtrl.programMove(origin, false, 0.0f);
-                        mode = Mode.IDLE;
+                        mode = Mode.STOP;
                     }
                     grblMode = null;
                     sysMgr.getGrblStatusMonitor().startMonitoringTask();
@@ -104,11 +111,15 @@ public class ProgramController {
     }
     
     public void stopProgram() {
-        
+        mode = Mode.STOP;
     }
     
     public void pauseProgram() {
-        
+        if (mode == Mode.RUN) {
+            mode = Mode.PAUSE;
+        } else if (mode == Mode.PAUSE) {
+            mode = Mode.RUN;
+        }
     }
     
     public float[] getLineSpan() {

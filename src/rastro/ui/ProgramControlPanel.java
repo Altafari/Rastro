@@ -21,9 +21,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import rastro.controller.CommController;
-import rastro.controller.RastroConfigCommand;
-import rastro.controller.RastroLineCommand;
 import rastro.model.GrblSettings;
 import rastro.system.IStateListener;
 import rastro.system.SystemManager;
@@ -58,13 +55,10 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
                 sysMgr.getProgramController().startProgram();
                 break;
             case "stop":
+                sysMgr.getProgramController().stopProgram();
                 break;
             case "pause":
-                CommController rcc = sysMgr.getRastroCommController();
-                rcc.sendCommand(new RastroConfigCommand(8));
-                RastroLineCommand rlc = new RastroLineCommand(8);
-                rlc.packLine(false, new boolean[8]);
-                rcc.sendCommand(rlc);
+                sysMgr.getProgramController().pauseProgram();
                 break;
             default:
             }
