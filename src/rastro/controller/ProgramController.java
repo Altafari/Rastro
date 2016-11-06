@@ -58,7 +58,7 @@ public class ProgramController {
                 };
                 sysMgr.getGrblStatusMonitor().addModeListener(modeListener);
                 sysMgr.getGrblStatusMonitor().startMonitoringTask();
-                lineCommand.packLine(false, lines.next());
+                lineCommand.packLine(true, lines.next());   // Inverted in the current setup
                 rastroCtrl.sendCommand(lineCommand);
                 float currentY = origin[1];
                 grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);

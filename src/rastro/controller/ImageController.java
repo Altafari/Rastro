@@ -47,10 +47,10 @@ public class ImageController {
     }
 
     public boolean isBlack(float mmX, float mmY) {
-        int x = Math.round(mmX / pixelSize);
-        int y = Math.round(mmY / pixelSize);
+        int x = (int)(mmX / pixelSize); // Actually cast is an implicit floor function
+        int y = (int)(mmY / pixelSize);
         if (!isValidCoord(x, y)) {
-            return false;
+            return true;    // Laser should be off outside the image
         }
         int color = img.getRGB(x, y) & 0x00FFFFFF;
         return color == 0;
