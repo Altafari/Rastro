@@ -64,10 +64,12 @@ public class ProgramController {
                 grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
                 while (mode == Mode.RUN || mode == Mode.PAUSE) {
                     while (mode == Mode.PAUSE) {
-                        try {
-                            this.wait(100);
-                        } catch (InterruptedException e) {
-                            break;
+                        synchronized(this) {
+                            try {
+                                this.wait(100);
+                            } catch (InterruptedException e) {
+                                break;
+                            }
                         }
                     }
                     synchronized (this) {
