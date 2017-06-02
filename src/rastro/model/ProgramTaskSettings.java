@@ -15,6 +15,7 @@ public class ProgramTaskSettings {
 
     private final float HW_TIME_QUANT_MS = 5.0E-4f;
     private final float MS_TO_MIN = 6.0E4f;
+    private final float SPM_X_BY_SENSOR = 2400.0f / 25.4f;
 
     private SystemManager sysMgr;
     private float spmX;
@@ -24,7 +25,7 @@ public class ProgramTaskSettings {
     private int nSkip;
     private float beamR;
     private float expTime;
-    private ScanMode scanMode = ScanMode.PROGRESSIVE;
+    private ScanMode scanMode = ScanMode.ZIGZAG;
     
     public ProgramTaskSettings(SystemManager sysManager, float beamRad, float expoTime) {
         sysMgr = sysManager;
@@ -39,8 +40,8 @@ public class ProgramTaskSettings {
     
     public Iterator<boolean[]> getScannerIterator() {
         ImageController imCon = sysMgr.getImageController();
-        ScanningShape scShape = new ScanningShape(beamR, spmX, spmY);
-        RasterScanner rScanner = new RasterScanner(spmX, spmY, rSize, scShape.getShape(), nSkip);
+        ScanningShape scShape = new ScanningShape(beamR, SPM_X_BY_SENSOR, spmY);
+        RasterScanner rScanner = new RasterScanner(SPM_X_BY_SENSOR, spmY, rSize, scShape.getShape(), nSkip);
         rScanner.loadImage(imCon);
         return rScanner.iterator();            
     }
