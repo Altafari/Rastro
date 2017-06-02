@@ -32,7 +32,7 @@ public class ProgramTaskSettings {
         spmX = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_X);
         spmY = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_Y);
         imgDim = sysMgr.getImageController().getDimensions();
-        rSize = new int[] {Math.round(spmX * imgDim[0]), Math.round(spmY * imgDim[1])};        
+        rSize = new int[] {Math.round(SPM_X_BY_SENSOR * imgDim[0]), Math.round(spmY * imgDim[1])};        
         nSkip = sysMgr.getProgramControlPanel().getLineSkip();
         beamR = beamRad;
         expTime = expoTime;
