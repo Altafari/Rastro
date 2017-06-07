@@ -37,8 +37,9 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JButton startBtn;
     private JButton stopBtn;
     private JButton pauseBtn;
-    private JSlider beamRad;;
-    private final float[] radValues = {0.01f, 0.015f, 0.02f, 0.025f, 0.03f, 0.035f, 0.04f, 0.045f, 0.05f};
+    private JSlider beamW;
+    private JSlider beamH;
+    private final float[] RAD_VALUES = {0.01f, 0.02f, 0.03f, 0.04f, 0.05f};
     private JSlider lineStep;
     private JFormattedTextField overScan;
     private JFormattedTextField expTime;
@@ -95,30 +96,40 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         pauseBtn.addActionListener(actionListener);
         pauseBtn.setMaximumSize(DIM_BUTTON);
 
-        JPanel radSliderPanel = new JPanel();
-        radSliderPanel.setLayout(new BoxLayout(radSliderPanel, BoxLayout.PAGE_AXIS));
-        beamRad = new JSlider(JSlider.VERTICAL, 0, 8, 4);
-        beamRad.setMajorTickSpacing(4);
-        beamRad.setMinorTickSpacing(1);
-        beamRad.setPaintTicks(true);
-        beamRad.setPaintLabels(true);
+        JPanel beamSliderPanel = new JPanel();
+        beamSliderPanel.setLayout(new BoxLayout(beamSliderPanel, BoxLayout.PAGE_AXIS));
+        beamW = new JSlider(JSlider.VERTICAL, 0, RAD_VALUES.length - 1, RAD_VALUES.length / 2);
+        beamH = new JSlider(JSlider.VERTICAL, 0, RAD_VALUES.length - 1, RAD_VALUES.length / 2);
+        beamW.setMinorTickSpacing(1);
+        beamH.setMinorTickSpacing(1);
+        beamW.setPaintTicks(true);
+        beamH.setPaintTicks(true);
+        beamW.setPaintLabels(true);
+        beamH.setPaintLabels(true);
         Hashtable<Object, Object> radLabels = new Hashtable<Object, Object>();
-        radLabels.put(0, new JLabel("0.01"));
-        radLabels.put(4, new JLabel("0.03"));
-        radLabels.put(8, new JLabel("0.05"));
-        beamRad.setLabelTable(radLabels);
-        beamRad.setAlignmentX(CENTER_ALIGNMENT);
-        beamRad.addChangeListener(changeListener);
-        JLabel radSliderLabel = new JLabel("Beam radius");
+        radLabels.put(0, new JLabel(String.valueOf((int)(1000 * RAD_VALUES[0]))));
+        radLabels.put(RAD_VALUES.length / 2, new JLabel(String.valueOf((int)(1000 * RAD_VALUES[RAD_VALUES.length / 2]))));
+        radLabels.put(RAD_VALUES.length - 1, new JLabel(String.valueOf((int)(1000 * RAD_VALUES[RAD_VALUES.length - 1]))));
+        beamW.setLabelTable(radLabels);
+        beamH.setLabelTable(radLabels);
+        beamW.setAlignmentX(CENTER_ALIGNMENT);
+        beamH.setAlignmentX(CENTER_ALIGNMENT);
+        beamW.addChangeListener(changeListener);
+        beamH.addChangeListener(changeListener);
+        JLabel radSliderLabel = new JLabel("X-Beam-Y      ");
         radSliderLabel.setAlignmentX(CENTER_ALIGNMENT);
-        radSliderPanel.add(radSliderLabel);
-        radSliderPanel.add(Box.createVerticalStrut(PADDING_SMALL));
-        radSliderPanel.add(beamRad);
+        beamSliderPanel.add(radSliderLabel);
+        beamSliderPanel.add(Box.createVerticalStrut(PADDING_SMALL));
+        JPanel sliderPairPanel = new JPanel();
+        sliderPairPanel.setLayout(new BoxLayout(sliderPairPanel, BoxLayout.LINE_AXIS));
+        sliderPairPanel.add(beamW);
+        sliderPairPanel.add(Box.createHorizontalStrut(PADDING_LARGE));
+        sliderPairPanel.add(beamH);
+        beamSliderPanel.add(sliderPairPanel);
         
         JPanel stepSliderPanel = new JPanel();
         stepSliderPanel.setLayout(new BoxLayout(stepSliderPanel, BoxLayout.PAGE_AXIS));
         lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 3);
-        lineStep.setMajorTickSpacing(4);
         lineStep.setMinorTickSpacing(1);
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
@@ -183,7 +194,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         this.add(textFieldPanel);
         this.add(Box.createHorizontalGlue());
         this.add(stepSliderPanel);
-        this.add(radSliderPanel);
+        this.add(beamSliderPanel);
         this.add(Box.createHorizontalGlue());
         this.add(buttonPanel);
         this.add(Box.createHorizontalStrut(PADDING_SMALL));
@@ -193,8 +204,12 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         return lineStep.getValue() + 1;
     }
     
-    public float getBeamRad() {
-        return radValues[beamRad.getValue()];
+    public float getBeamW() {
+        return RAD_VALUES[beamW.getValue()];
+    }
+
+    public float getBeamH() {
+        return RAD_VALUES[beamH.getValue()];
     }
 
     public float getExpTime() {

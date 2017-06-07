@@ -3,9 +3,9 @@ package rastro.model;
 public class ScanningShape {
     private boolean[][] shape;
     
-    public ScanningShape(float radius, float spmX, float spmY) {
-        float radX = Math.round(radius * spmX);
-        float radY = Math.round(radius * spmY);
+    public ScanningShape(float width, float height) {
+        float radX = Math.round(width);
+        float radY = Math.round(height);
         int szX = 2 * (int)radX + 1;
         int szY = 2 * (int)radY + 1;
         radX = radX + 0.2f;

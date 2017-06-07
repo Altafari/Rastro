@@ -29,7 +29,7 @@ public class ProgramController {
         }            
         mode = Mode.RUN;
         ProgramControlPanel pcp = sysMgr.getProgramControlPanel();
-        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, pcp.getBeamRad(), pcp.getExpTime());
+        final ProgramTaskSettings pts = new ProgramTaskSettings(sysMgr, pcp.getBeamW(), pcp.getBeamH(), pcp.getExpTime());
         final Iterator<boolean[]> lines = pts.getScannerIterator();
         final RastroLineCommand lineCommand = pts.getLineCommand();
         final float[] origin = sysMgr.getGrblController().getOrigin();
