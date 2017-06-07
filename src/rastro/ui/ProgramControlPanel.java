@@ -176,7 +176,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         overScan.addPropertyChangeListener(propChangeListener);
         expTime = new JFormattedTextField(NumberFormat.getNumberInstance());
         expTime.setPreferredSize(DIM_TEXTFIELD);
-        expTime.setValue(new Float(300.0f));
+        expTime.setValue(new Float(150.0f));
         expTime.addPropertyChangeListener(propChangeListener);
         
         JPanel overScanPanel = new JPanel();
