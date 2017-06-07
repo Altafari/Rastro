@@ -20,6 +20,10 @@ public class RastroLineCommand extends RastroCommand {
             packStraightLine(line, LINE_HDR.length);
         }
     }
+    
+    public void blind() {
+        packStraightLine(new boolean[super.lineLen], LINE_HDR.length);
+    }
 
     private void packStraightLine(boolean[] line, int buffOffset) {
         for (int i = 0; i < line.length; i++) {

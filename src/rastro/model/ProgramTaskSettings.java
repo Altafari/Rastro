@@ -29,10 +29,10 @@ public class ProgramTaskSettings {
     
     public ProgramTaskSettings(SystemManager sysManager, float beamRad, float expoTime) {
         sysMgr = sysManager;
-        spmX = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_X);
+        spmX = SPM_X_BY_SENSOR;
         spmY = sysMgr.getGrblSettings().getSettings().get(GrblSetting.STEP_PER_MM_Y);
         imgDim = sysMgr.getImageController().getDimensions();
-        rSize = new int[] {Math.round(SPM_X_BY_SENSOR * imgDim[0]), Math.round(spmY * imgDim[1])};        
+        rSize = new int[] {Math.round(spmX * imgDim[0]), Math.round(spmY * imgDim[1])};
         nSkip = sysMgr.getProgramControlPanel().getLineSkip();
         beamR = beamRad;
         expTime = expoTime;
@@ -40,10 +40,10 @@ public class ProgramTaskSettings {
     
     public Iterator<boolean[]> getScannerIterator() {
         ImageController imCon = sysMgr.getImageController();
-        ScanningShape scShape = new ScanningShape(beamR, SPM_X_BY_SENSOR, spmY);
-        RasterScanner rScanner = new RasterScanner(SPM_X_BY_SENSOR, spmY, rSize, scShape.getShape(), nSkip);
+        ScanningShape scShape = new ScanningShape(beamR, spmX, spmY);
+        RasterScanner rScanner = new RasterScanner(spmX, spmY, rSize, scShape.getShape(), nSkip);
         rScanner.loadImage(imCon);
-        return rScanner.iterator();            
+        return rScanner.iterator();
     }
     
     public ICommCommand getConfigCommand() {

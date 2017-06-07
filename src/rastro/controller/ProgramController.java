@@ -105,7 +105,9 @@ public class ProgramController {
                     sysMgr.getGrblStatusMonitor().startMonitoringTask();
                 }
                 sysMgr.getGrblStatusMonitor().removeModeListener(modeListener);
-                grblCtrl.setMode(GrblController.Mode.JOGGING);                
+                lineCommand.blind();
+                rastroCtrl.sendCommand(lineCommand);
+                grblCtrl.setMode(GrblController.Mode.JOGGING);
             }
         };
         progThread = new Thread(prog);
