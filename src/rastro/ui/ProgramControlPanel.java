@@ -98,7 +98,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
 
         JPanel beamSliderPanel = new JPanel();
         beamSliderPanel.setLayout(new BoxLayout(beamSliderPanel, BoxLayout.PAGE_AXIS));
-        beamW = new JSlider(JSlider.VERTICAL, 0, RAD_VALUES.length - 1, RAD_VALUES.length / 2);
+        beamW = new JSlider(JSlider.VERTICAL, 0, RAD_VALUES.length - 1, RAD_VALUES.length / 2 + 1);
         beamH = new JSlider(JSlider.VERTICAL, 0, RAD_VALUES.length - 1, RAD_VALUES.length / 2);
         beamW.setMinorTickSpacing(1);
         beamH.setMinorTickSpacing(1);
@@ -116,7 +116,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         beamH.setAlignmentX(CENTER_ALIGNMENT);
         beamW.addChangeListener(changeListener);
         beamH.addChangeListener(changeListener);
-        JLabel radSliderLabel = new JLabel("X-Beam-Y      ");
+        JLabel radSliderLabel = new JLabel("X-BeamR-Y     ");
         radSliderLabel.setAlignmentX(CENTER_ALIGNMENT);
         beamSliderPanel.add(radSliderLabel);
         beamSliderPanel.add(Box.createVerticalStrut(PADDING_SMALL));
