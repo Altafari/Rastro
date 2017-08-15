@@ -43,7 +43,7 @@ public class ImageInfoPanel extends BorderedTitledPanel implements IStateListene
     
     @Override
     protected int getRackHeight() {
-        return (int)(RACK_HEIGHT * 0.8f);
+        return (int)(RACK_HEIGHT * 0.7f);
     }
 
     @Override
