@@ -15,6 +15,7 @@ import rastro.model.GrblStatusMonitor;
 import rastro.ui.CncOriginPanel;
 import rastro.ui.CncPositioningPanel;
 import rastro.ui.CommPanel;
+import rastro.ui.FlipMirroringPanel;
 import rastro.ui.ImageControlPanel;
 import rastro.ui.ImageInfoPanel;
 import rastro.ui.ProgramControlPanel;
@@ -35,6 +36,7 @@ public class SystemManager {
     private ImageInfoPanel imgInfoPanel;
     private ImageController imgCtrl;
     private ImageControlPanel imgCtrlPanel;
+    private FlipMirroringPanel flipMirroringPanel;
     private ProgramControlPanel progCtrlPanel;
     private GrblStatusMonitor grblStatusMonitor;
     private GrblController grblController;
@@ -71,6 +73,7 @@ public class SystemManager {
         imgInfoPanel = new ImageInfoPanel(this);
         imgCtrl = new ImageController();
         imgCtrlPanel = new ImageControlPanel(this);
+        flipMirroringPanel = new FlipMirroringPanel();
         progCtrlPanel = new ProgramControlPanel(this);
         grblStatusMonitor = new GrblStatusMonitor(this);
         grblController = new GrblController(this);
@@ -121,6 +124,10 @@ public class SystemManager {
     
     public ImageControlPanel getImageControlPanel() {
         return imgCtrlPanel;
+    }
+    
+    public FlipMirroringPanel getFlipMirroringPanel() {
+        return flipMirroringPanel;
     }
     
     public CncPositioningPanel getCncPositioningPanel() {

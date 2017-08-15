@@ -24,6 +24,7 @@ public class MainDialog {
         ctrlPanel.add(sysMgr.getRastroCommPanel());
         ctrlPanel.add(sysMgr.getImageControlPanel());
         ctrlPanel.add(sysMgr.getImageInfoPanel());
+        ctrlPanel.add(sysMgr.getFlipMirroringPanel());
         ctrlPanel.add(sysMgr.getCncOriginPanel());
         ctrlPanel.add(sysMgr.getCncPositioningPanel());
         ctrlPanel.add(sysMgr.getProgramControlPanel());
