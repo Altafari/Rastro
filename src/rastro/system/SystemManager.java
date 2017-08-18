@@ -73,11 +73,11 @@ public class SystemManager {
         imgInfoPanel = new ImageInfoPanel(this);
         imgCtrl = new ImageController();
         imgCtrlPanel = new ImageControlPanel(this);
-        flipMirroringPanel = new FlipMirroringPanel();
         progCtrlPanel = new ProgramControlPanel(this);
         grblStatusMonitor = new GrblStatusMonitor(this);
         grblController = new GrblController(this);
         progCtrl = new ProgramController(this);
+        flipMirroringPanel = new FlipMirroringPanel(this);
     }
     
     private void wireUpObservers() {
