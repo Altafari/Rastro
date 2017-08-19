@@ -141,6 +141,7 @@ public class ProgramController {
         float[] lineSpan = new float[2];
         lineSpan[0] = Math.max(0.0f, flipOffset + origin[0] - overScan);
         lineSpan[1] = Math.min(maxTravelX, flipOffset + imgDim[0] + origin[0] + overScan);
+        lineSpan[0] = Math.min(lineSpan[0], lineSpan[1]);
         return lineSpan;
     }
  /*
