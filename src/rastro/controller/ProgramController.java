@@ -44,8 +44,6 @@ public class ProgramController {
             public void run() {
                 GrblController grblCtrl = sysMgr.getGrblController();
                 CommController rastroCtrl = sysMgr.getRastroCommController();
-                grblCtrl.setMode(GrblController.Mode.PROGRAM);
-                rastroCtrl.sendCommand(pts.getConfigCommand());
                 IModeListener modeListener = new IModeListener() {
                     @Override
                     public void onChange(GrblStatusMonitor.Mode mode) {
@@ -59,29 +57,19 @@ public class ProgramController {
                 };
                 sysMgr.getGrblStatusMonitor().addModeListener(modeListener);
                 sysMgr.getGrblStatusMonitor().startMonitoringTask();
+                sysMgr.getGrblController().goOrigin();
+                waitUntilGrblCommandCompleted();
+                grblCtrl.setMode(GrblController.Mode.PROGRAM);
+                rastroCtrl.sendCommand(pts.getConfigCommand());
                 lineCommand.packLine(isFlipped, lines.next());
                 rastroCtrl.sendCommand(lineCommand);
                 float currentY = origin[1];
                 grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
                 while (mode == Mode.RUN || mode == Mode.PAUSE) {
                     while (mode == Mode.PAUSE) {
-                        synchronized(this) {
-                            try {
-                                this.wait(100);
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
+                       waitSomeTime(100);
                     }
-                    synchronized (this) {
-                    if (grblMode != GrblStatusMonitor.Mode.Idle) {
-                            try {
-                                this.wait();
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
-                    }
+                    waitUntilGrblCommandCompleted();
                     if (lDir == LineDir.BACK || pts.isZigZag()) {
                         lineCommand.packLine(isFlipped, lines.next());
                         rastroCtrl.sendCommand(lineCommand);
@@ -109,6 +97,20 @@ public class ProgramController {
                 lineCommand.blindLine();
                 rastroCtrl.sendCommand(lineCommand);
                 grblCtrl.setMode(GrblController.Mode.JOGGING);
+            }
+
+            private synchronized void waitUntilGrblCommandCompleted() {
+                if (grblMode != GrblStatusMonitor.Mode.Idle) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) { }
+                }
+            }
+
+            private synchronized void waitSomeTime(int timeMs) {
+                try {
+                    this.wait(timeMs);
+                } catch (InterruptedException e) { }
             }
         };
         progThread = new Thread(prog);

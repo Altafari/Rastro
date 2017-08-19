@@ -83,7 +83,8 @@ public class GrblController {
         if (!isIdleJogging()) {
             return;
         }
-        joggingMove(origin, false);
+        float xOffset = sysMgr.getFlipMirroringPanel().getFlipOffset();
+        joggingMove(new float[]{origin[0] + xOffset, origin[1], origin[2]}, false);
     }
 
     public void joggingMove(float[] pos, boolean isRelative) {
