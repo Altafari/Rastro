@@ -12,9 +12,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import rastro.system.IStateListener;
 import rastro.system.SystemManager;
 
-public class FlipMirroringPanel extends BorderedTitledPanel {
+public class FlipMirroringPanel extends BorderedTitledPanel implements IStateListener {
 
     /**
      * 
@@ -35,6 +36,7 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
     private JFormattedTextField flipOffsetWindow;
     private JFormattedTextField boardWidthField;
     private FlipPosition flipPosition;
+    private float imageWidth;
     
     private final ActionListener flipListener = new ActionListener() {
         @Override
@@ -93,6 +95,10 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         return ((Number)flipOffsetWindow.getValue()).floatValue();
     }
 
+    public boolean getFlipState() {
+        return flipPosition == FlipPosition.BOTTOM;
+    }
+
     @Override
     protected int getRackHeight() {
         return (int)(RACK_HEIGHT * 0.85f);
@@ -108,5 +114,15 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         }
         flipOffsetWindow.setValue(offset);
         sysMgr.notifyStateChanged();
+    }
+
+    @Override
+    public void stateChanged() {
+        float newImageWidth = sysMgr.getImageController().getDimensions()[0];
+        if (newImageWidth != imageWidth) {
+            imageWidth = newImageWidth;
+            boardWidthField.setValue(imageWidth);
+            onStateChanged();
+        }
     }
 }

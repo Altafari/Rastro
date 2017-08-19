@@ -91,6 +91,7 @@ public class SystemManager {
         stateListeners.add(progCtrlPanel);
         stateListeners.add(imgInfoPanel);
         stateListeners.add(cncPosPanel);
+        stateListeners.add(flipMirroringPanel);
     }
     
     private static synchronized void createNewInstance() {

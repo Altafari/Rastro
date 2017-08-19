@@ -11,8 +11,8 @@ import rastro.ui.ProgramControlPanel;
 
 public class ProgramController {
     
-    public enum Mode {STOP, RUN, PAUSE}
-    private enum LineDir {FORWARD, BACK}
+    public enum Mode { STOP, RUN, PAUSE }
+    private enum LineDir { FORWARD, BACK }
     private volatile Mode mode;
     private SystemManager sysMgr;
     private Runnable prog;
@@ -36,6 +36,7 @@ public class ProgramController {
         final float[] xSpan = getLineSpan();
         final float yStep = pts.getLineStep();
         final float feedRate = pts.getMaxFeedRate();
+        final boolean isFlipped = sysMgr.getFlipMirroringPanel().getFlipState();
         prog = new Runnable() {
             GrblStatusMonitor.Mode grblMode;
             LineDir lDir = LineDir.FORWARD;
@@ -58,7 +59,7 @@ public class ProgramController {
                 };
                 sysMgr.getGrblStatusMonitor().addModeListener(modeListener);
                 sysMgr.getGrblStatusMonitor().startMonitoringTask();
-                lineCommand.packLine(false, lines.next());
+                lineCommand.packLine(isFlipped, lines.next());
                 rastroCtrl.sendCommand(lineCommand);
                 float currentY = origin[1];
                 grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
@@ -82,7 +83,7 @@ public class ProgramController {
                         }
                     }
                     if (lDir == LineDir.BACK || pts.isZigZag()) {
-                        lineCommand.packLine(false, lines.next());
+                        lineCommand.packLine(isFlipped, lines.next());
                         rastroCtrl.sendCommand(lineCommand);
                     }
                     if (lDir == LineDir.FORWARD) {                        
@@ -105,7 +106,7 @@ public class ProgramController {
                     sysMgr.getGrblStatusMonitor().startMonitoringTask();
                 }
                 sysMgr.getGrblStatusMonitor().removeModeListener(modeListener);
-                lineCommand.blind();
+                lineCommand.blindLine();
                 rastroCtrl.sendCommand(lineCommand);
                 grblCtrl.setMode(GrblController.Mode.JOGGING);
             }
@@ -130,6 +131,7 @@ public class ProgramController {
         float overScan = sysMgr.getProgramControlPanel().getOverScan();
         float[] origin = sysMgr.getGrblController().getOrigin();
         float[] imgDim = sysMgr.getImageController().getDimensions();
+        float flipOffset = sysMgr.getFlipMirroringPanel().getFlipOffset();
         float maxTravelX = 0.0f;
         Map<GrblSettings.GrblSetting, Float> settings = sysMgr.getGrblSettings().getSettings();
         GrblSettings.GrblSetting key = GrblSettings.GrblSetting.MAX_TRAVEL_X;
@@ -137,8 +139,8 @@ public class ProgramController {
             maxTravelX = settings.get(key);
         }
         float[] lineSpan = new float[2];
-        lineSpan[0] = Math.max(0.0f, origin[0] - overScan);
-        lineSpan[1] = Math.min(maxTravelX, imgDim[0] + origin[0] + overScan);
+        lineSpan[0] = Math.max(0.0f, flipOffset + origin[0] - overScan);
+        lineSpan[1] = Math.min(maxTravelX, flipOffset + imgDim[0] + origin[0] + overScan);
         return lineSpan;
     }
  /*

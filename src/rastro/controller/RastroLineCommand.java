@@ -21,7 +21,7 @@ public class RastroLineCommand extends RastroCommand {
         }
     }
     
-    public void blind() {
+    public void blindLine() {
         packStraightLine(new boolean[super.lineLen], LINE_HDR.length);
     }
 
