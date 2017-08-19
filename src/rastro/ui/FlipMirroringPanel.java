@@ -11,8 +11,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import rastro.system.SystemManager;
 
@@ -29,33 +27,28 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
     private final Dimension DIM_BUTTON = new Dimension(80, 22);
     private final String STR_TOP = "Top";
     private final String STR_BOTTOM = "Bottom";
+    private final String CMD_FLIP = "flip";
+    private final float DEFAULT_BOARD_WIDTH = 75.0f;
     
     private SystemManager sysMgr;
     private JTextField statusWindow;
     private JFormattedTextField flipOffsetWindow;
-    private JFormattedTextField boardWidth;
+    private JFormattedTextField boardWidthField;
     private FlipPosition flipPosition;
-    private float flipOffset;
-    
-    private final ChangeListener changeListener = new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
-            sysMgr.notifyStateChanged();
-        }
-    };
     
     private final ActionListener flipListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
-            if (flipPosition.equals(FlipPosition.TOP)) {
-                flipPosition = FlipPosition.BOTTOM;
-                statusWindow.setText(STR_BOTTOM);
-                onStateChanged();
-            } else {
-                flipPosition = FlipPosition.TOP;
-                statusWindow.setText(STR_TOP);
-                onStateChanged();
+            if (event.getActionCommand().equals(CMD_FLIP)) {
+                if (flipPosition.equals(FlipPosition.TOP)) {
+                    flipPosition = FlipPosition.BOTTOM;
+                    statusWindow.setText(STR_BOTTOM);
+                } else {
+                    flipPosition = FlipPosition.TOP;
+                    statusWindow.setText(STR_TOP);
+                }
             }
+            onStateChanged();
         }  
     };
 
@@ -63,15 +56,17 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         super("Board flip horizontal mirroring");
         sysMgr = sysManager;
         flipPosition = FlipPosition.TOP;
-        boardWidth = new JFormattedTextField(NumberFormat.getNumberInstance());
-        boardWidth.setPreferredSize(DIM_TEXTFIELD);
-        boardWidth.setValue(new Float(15.0f));
+        boardWidthField = new JFormattedTextField(NumberFormat.getNumberInstance());
+        boardWidthField.setPreferredSize(DIM_TEXTFIELD);
+        boardWidthField.setValue(DEFAULT_BOARD_WIDTH);
+        boardWidthField.addActionListener(flipListener);
         JButton flipButton = new JButton("Flip");
         flipButton.setPreferredSize(DIM_BUTTON);
+        flipButton.setActionCommand(CMD_FLIP);
         flipButton.addActionListener(flipListener);
         flipOffsetWindow = new JFormattedTextField(NumberFormat.getNumberInstance());
         flipOffsetWindow.setPreferredSize(DIM_TEXTFIELD);
-        flipOffsetWindow.setValue(new Float(15.0f));
+        flipOffsetWindow.setValue(0.0f);
         flipOffsetWindow.setEditable(false);
         statusWindow = new JTextField();
         statusWindow.setPreferredSize(DIM_TEXTFIELD);
@@ -79,7 +74,7 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         statusWindow.setEditable(false);
         JPanel controlsPanel = new JPanel();
         controlsPanel.add(new JLabel("Board width"));
-        controlsPanel.add(boardWidth);
+        controlsPanel.add(boardWidthField);
         controlsPanel.add(Box.createHorizontalStrut(PADDING_SMALL));
         controlsPanel.add(new JLabel("Origin offset"));
         controlsPanel.add(flipOffsetWindow);
@@ -88,6 +83,14 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         controlsPanel.add(Box.createHorizontalStrut(PADDING_SMALL));
         controlsPanel.add(flipButton);
         this.add(controlsPanel);
+    }
+
+    public void setBoardWidth(float boardWidth) {
+        boardWidthField.setValue(boardWidth);
+    }
+
+    public float getFlipOffset() {
+        return ((Number)flipOffsetWindow.getValue()).floatValue();
     }
 
     @Override
@@ -99,10 +102,11 @@ public class FlipMirroringPanel extends BorderedTitledPanel {
         float offset;
         if (flipPosition.equals(FlipPosition.TOP)) {
             offset = 0;
-            flipOffsetWindow.setValue(offset);
         } else {
-            offset = ((Number)boardWidth.getValue()).floatValue() - sysMgr.getImageController().getDimensions()[0];            
-            flipOffsetWindow.setValue(offset);
+            offset = ((Number)boardWidthField.getValue()).floatValue() -
+                    sysMgr.getImageController().getDimensions()[0];
         }
+        flipOffsetWindow.setValue(offset);
+        sysMgr.notifyStateChanged();
     }
 }
