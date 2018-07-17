@@ -13,7 +13,7 @@ import rastro.system.SystemManager;
 
 public class GrblController {
     
-    public enum Mode { PROGRAM, JOGGING };
+    public enum Mode { INIT, PROGRAM, JOGGING };
     private Mode mode;
     private SystemManager sysMgr;
     private float[] origin;
@@ -66,7 +66,7 @@ public class GrblController {
     
     public GrblController(SystemManager sysManager) {
         sysMgr = sysManager;
-        mode = Mode.JOGGING;
+        mode = Mode.INIT;
         origin = new float[3];
         originListeners = new HashSet<ICoordListener>();
     }
@@ -77,6 +77,12 @@ public class GrblController {
         }
         origin = sysMgr.getGrblStatusMonitor().getPosition();
         notifyListeners();
+    }
+    
+    public void homingCycle() {
+        ICommCommand homingCmd = new ControlCommand("$H\n");
+        sysMgr.getGrblCommController().sendCommand(homingCmd);
+        mode = Mode.JOGGING;
     }
     
     public void goOrigin() {

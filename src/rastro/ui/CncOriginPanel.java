@@ -4,8 +4,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +23,7 @@ public class CncOriginPanel extends BorderedTitledPanel {
     private JTextField originX;
     private JTextField originY;
     private JButton goZero;
+    private JButton homingCycle;
     private JButton setOrigin;
     private JButton goOrigin;
     private static final Dimension NUM_FIELD = new Dimension(55, 22);
@@ -51,6 +50,10 @@ public class CncOriginPanel extends BorderedTitledPanel {
         goZero = new JButton("Go zero");
         JPanel panelGoZero = new JPanel();
         panelGoZero.add(goZero);
+        
+        homingCycle = new JButton("Homing");
+        JPanel panelHoming = new JPanel();
+        panelHoming.add(homingCycle);
         
         setOrigin = new JButton("Set origin");
         JPanel panelSetOrigin = new JPanel();
@@ -84,7 +87,7 @@ public class CncOriginPanel extends BorderedTitledPanel {
         this.add(cellOriginX);
         this.add(panelGoOrigin);
         this.add(cellPositionY);
-        this.add(Box.createHorizontalGlue());
+        this.add(panelHoming);
         this.add(cellOriginY);
         this.add(panelSetOrigin);
         posListener = new ICoordListener() {
@@ -106,6 +109,9 @@ public class CncOriginPanel extends BorderedTitledPanel {
             public void actionPerformed(ActionEvent event) {
                 String command = event.getActionCommand();
                 switch (command) {
+                case "homingCycle":
+                    sysMgr.getGrblController().homingCycle();
+                    break;
                 case "goZero":
                     sysMgr.getGrblController().joggingMove(new float[] {0.0f, 0.0f, 0.0f}, false);
                     break;
@@ -120,6 +126,8 @@ public class CncOriginPanel extends BorderedTitledPanel {
                 sysMgr.notifyStateChanged();
             }
         };
+        homingCycle.setActionCommand("homingCycle");
+        homingCycle.addActionListener(actionListener);
         goZero.setActionCommand("goZero");
         goZero.addActionListener(actionListener);
         setOrigin.setActionCommand("setOrigin");
