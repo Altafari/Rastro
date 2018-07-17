@@ -18,6 +18,8 @@ public class GrblController {
     private SystemManager sysMgr;
     private float[] origin;
     private Set<ICoordListener> originListeners;
+    private final float DEFAULT_ORIGIN_X = 30.5f;
+    private final float DEFAULT_ORIGIN_Y = 4.4f;
     
     private class ControlCommand implements ICommCommand {
         
@@ -68,6 +70,8 @@ public class GrblController {
         sysMgr = sysManager;
         mode = Mode.INIT;
         origin = new float[3];
+        origin[0] = DEFAULT_ORIGIN_X;
+        origin[1] = DEFAULT_ORIGIN_Y;
         originListeners = new HashSet<ICoordListener>();
     }
 
