@@ -48,7 +48,7 @@ public class ImageController {
 
     public boolean isBlack(float mmX, float mmY) {
         int x = (int)(mmX / pixelSize); // Actually cast is an implicit floor function
-        int y = (int)(mmY / pixelSize);
+        int y = (height - 1) - (int)(mmY / pixelSize);
         if (!isValidCoord(x, y)) {
             return false;    // Avoid "border" effect
         }
