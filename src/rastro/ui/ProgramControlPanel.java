@@ -129,12 +129,12 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         
         JPanel stepSliderPanel = new JPanel();
         stepSliderPanel.setLayout(new BoxLayout(stepSliderPanel, BoxLayout.PAGE_AXIS));
-        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 1);
+        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 3);
         lineStep.setMinorTickSpacing(1);
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
         Hashtable<Object, Object> stepLabels = new Hashtable<Object, Object>();
-        for (int i = 0; i< 6; i++) {
+        for (int i = 0; i < 6; i++) {
             stepLabels.put(i, new JLabel(Integer.toString(i + 1)));
         }
         lineStep.setLabelTable(stepLabels);
@@ -176,7 +176,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         overScan.addPropertyChangeListener(propChangeListener);
         expTime = new JFormattedTextField(NumberFormat.getNumberInstance());
         expTime.setPreferredSize(DIM_TEXTFIELD);
-        expTime.setValue(new Float(200.0f));
+        expTime.setValue(new Float(100.0f));
         expTime.addPropertyChangeListener(propChangeListener);
         
         JPanel overScanPanel = new JPanel();
