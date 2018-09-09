@@ -25,7 +25,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
     private JButton btnBrowse;
     private JTextField imageDpi;
     private JFileChooser fc;
-    private int dpi = 900;
+    private int dpi = 2400;
     private static final int MIN_DPI = 75;
     private static final int MAX_DPI = 2400;
     private static final Dimension DIM_FILE_FIELD = new Dimension(180, 22);
