@@ -47,6 +47,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JLabel lineBoundary;
     private final Dimension DIM_TEXTFIELD = new Dimension(50, 22);
     private final Dimension DIM_BUTTON = new Dimension(80, 22);
+    private final int LINE_SKIP_STEP = 4;
     
     private final ActionListener actionListener = new ActionListener() {
         @Override
@@ -129,13 +130,13 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         
         JPanel stepSliderPanel = new JPanel();
         stepSliderPanel.setLayout(new BoxLayout(stepSliderPanel, BoxLayout.PAGE_AXIS));
-        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 3);
+        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 1);
         lineStep.setMinorTickSpacing(1);
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
         Hashtable<Object, Object> stepLabels = new Hashtable<Object, Object>();
         for (int i = 0; i < 6; i++) {
-            stepLabels.put(i, new JLabel(Integer.toString(i + 1)));
+            stepLabels.put(i, new JLabel(Integer.toString((i + 1) * LINE_SKIP_STEP)));
         }
         lineStep.setLabelTable(stepLabels);
         lineStep.setAlignmentX(CENTER_ALIGNMENT);
@@ -176,7 +177,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         overScan.addPropertyChangeListener(propChangeListener);
         expTime = new JFormattedTextField(NumberFormat.getNumberInstance());
         expTime.setPreferredSize(DIM_TEXTFIELD);
-        expTime.setValue(new Float(100.0f));
+        expTime.setValue(new Float(30.0f));
         expTime.addPropertyChangeListener(propChangeListener);
         
         JPanel overScanPanel = new JPanel();
@@ -201,7 +202,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     }
 
     public int getLineSkip() {
-        return lineStep.getValue() + 1;
+        return (lineStep.getValue() + 1) * LINE_SKIP_STEP;
     }
     
     public float getBeamW() {

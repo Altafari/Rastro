@@ -16,7 +16,7 @@ public class ProgramTaskSettings {
     private final float HW_TIME_QUANT_MS = 5.0E-4f;
     private final float MS_TO_MIN = 6.0E4f;
     private final float SPM_X_BY_SENSOR = 1200.0f / 25.4f;
-    private final int DEFAULT_OFFSET_CORRECTION = 1;
+    private final int DEFAULT_OFFSET_CORRECTION = 0;
 
     private SystemManager sysMgr;
     private float spmX;

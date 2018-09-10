@@ -146,18 +146,6 @@ public class ProgramController {
         lineSpan[0] = Math.min(lineSpan[0], lineSpan[1]);
         return lineSpan;
     }
- /*
-    private float computeMoveCompletionTime(float dist, float feedRate, float accRate) {
-        float accTime = feedRate / accRate;
-        float accDist = feedRate * 0.5f * accTime;
-        if (accDist >= 0.5f * dist) {
-            // No steady feed rate region
-            return 2.0f * (float) Math.sqrt(dist / accRate);    // Divide and multiply by 2
-        } else {
-            // Acceleration completes
-            return 2.0f * accTime + (dist - 2.0f * accDist) / feedRate;
-        }
-    }*/
 }
 
 
