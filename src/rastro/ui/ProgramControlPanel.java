@@ -39,7 +39,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JButton pauseBtn;
     private JSlider beamW;
     private JSlider beamH;
-    private final float[] RAD_VALUES = {0.02f, 0.04f, 0.06f, 0.08f, 0.1f};
+    private final float[] RAD_VALUES = {0.02f, 0.03f, 0.04f, 0.05f, 0.06f};
     private JSlider lineStep;
     private JFormattedTextField overScan;
     private JFormattedTextField expTime;
