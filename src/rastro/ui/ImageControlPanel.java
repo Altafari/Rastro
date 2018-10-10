@@ -27,7 +27,7 @@ public class ImageControlPanel extends BorderedTitledPanel {
     private JFileChooser fc;
     private int dpi = 2400;
     private static final int MIN_DPI = 75;
-    private static final int MAX_DPI = 2400;
+    private static final int MAX_DPI = 10000;
     private static final Dimension DIM_FILE_FIELD = new Dimension(180, 22);
     private static final Dimension DIM_DPI_FIELD = new Dimension(40, 22);
     private static final String[] ACCEPTED_FILE_EXTENSIONS = {".jpg", ".jpeg", ".bmp", ".png", ".tiff"};
