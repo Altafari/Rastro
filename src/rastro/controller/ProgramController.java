@@ -63,8 +63,8 @@ public class ProgramController {
                 rastroCtrl.sendCommand(pts.getConfigCommand());
                 lineCommand.packLine(isFlipped, lines.next());
                 rastroCtrl.sendCommand(lineCommand);
-                float currentY = origin[1];
-                grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, 0.0f);
+                double currentY = origin[1];
+                grblCtrl.programMove(new float[] {xSpan[0], (float)currentY}, false, 0.0f);
                 while (mode == Mode.RUN || mode == Mode.PAUSE) {
                     while (mode == Mode.PAUSE) {
                        waitSomeTime(100);
@@ -75,10 +75,10 @@ public class ProgramController {
                         rastroCtrl.sendCommand(lineCommand);
                     }
                     if (lDir == LineDir.FORWARD) {                        
-                        grblCtrl.programMove(new float[] {xSpan[1], currentY}, false, feedRate);
+                        grblCtrl.programMove(new float[] {xSpan[1], (float)currentY}, false, feedRate);
                         lDir = LineDir.BACK;
                     } else {                        
-                        grblCtrl.programMove(new float[] {xSpan[0], currentY}, false, feedRate);
+                        grblCtrl.programMove(new float[] {xSpan[0], (float)currentY}, false, feedRate);
                         lDir = LineDir.FORWARD;
                     }
                     if (lines.hasNext()) {
