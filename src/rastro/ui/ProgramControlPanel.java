@@ -47,7 +47,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
     private JLabel lineBoundary;
     private final Dimension DIM_TEXTFIELD = new Dimension(50, 22);
     private final Dimension DIM_BUTTON = new Dimension(80, 22);
-    private final int LINE_SKIP_STEP = 4;
+    private final int LINE_SKIP_STEP = 1;
     
     private final ActionListener actionListener = new ActionListener() {
         @Override
@@ -130,7 +130,7 @@ public class ProgramControlPanel extends BorderedTitledPanel implements IStateLi
         
         JPanel stepSliderPanel = new JPanel();
         stepSliderPanel.setLayout(new BoxLayout(stepSliderPanel, BoxLayout.PAGE_AXIS));
-        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 1);
+        lineStep = new JSlider(JSlider.VERTICAL, 0, 5, 3);
         lineStep.setMinorTickSpacing(1);
         lineStep.setPaintTicks(true);
         lineStep.setPaintLabels(true);
