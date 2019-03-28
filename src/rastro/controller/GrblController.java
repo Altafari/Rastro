@@ -18,7 +18,7 @@ public class GrblController {
     private SystemManager sysMgr;
     private float[] origin;
     private Set<ICoordListener> originListeners;
-    private final float DEFAULT_ORIGIN_X = 30.65f;
+    private final float DEFAULT_ORIGIN_X = 30.9f;
     private final float DEFAULT_ORIGIN_Y = 4.45f;
     
     private class ControlCommand implements ICommCommand {
