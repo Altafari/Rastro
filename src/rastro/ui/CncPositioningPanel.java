@@ -93,7 +93,8 @@ public class CncPositioningPanel extends BorderedTitledPanel implements IStateLi
             btDir = bDir;
             BufferedImage img = null;
             try {
-                img = ImageIO.read(new File("resources/arrow.png"));
+                ClassLoader cl = this.getClass().getClassLoader();
+                img = ImageIO.read(cl.getResource("resources/arrow.png"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
