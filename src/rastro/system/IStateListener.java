@@ -1,5 +1,5 @@
 package rastro.system;
 
 public interface IStateListener {
-    void stateChanged();
+	void stateChanged();
 }
